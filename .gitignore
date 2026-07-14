@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+.vercel/
+*.log
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+
+# Never commit Solana key material.
+*-wallet.json
+id.json
