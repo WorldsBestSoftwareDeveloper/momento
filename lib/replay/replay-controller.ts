@@ -17,8 +17,8 @@ export interface ReplayControllerState {
 
 export const initialReplayControllerState: ReplayControllerState = { cursor: -1, running: false };
 
-export function replayReducer(state: ReplayControllerState, action: ReplayAction): ReplayControllerState {
-  const last = demoReplayBeats.length - 1;
+export function replayReducer(state: ReplayControllerState, action: ReplayAction, timeline = demoReplayBeats): ReplayControllerState {
+  const last = timeline.length - 1;
   switch (action.type) {
     case "start": return state.cursor < 0 ? { cursor: 0, running: true } : { ...state, running: true };
     case "next": return { cursor: Math.min(state.cursor + 1, last), running: state.cursor + 1 < last };
@@ -29,8 +29,12 @@ export function replayReducer(state: ReplayControllerState, action: ReplayAction
   }
 }
 
-export function buildReplayView(initialMatch: MatchRoomView, state: ReplayControllerState): ReplayViewState {
-  const beat = state.cursor >= 0 ? demoReplayBeats[state.cursor] : null;
+export function buildReplayView(initialMatch: MatchRoomView, state: ReplayControllerState, timeline = demoReplayBeats): ReplayViewState {
+  if (timeline.length === 0) {
+    const activeEvent = initialMatch.events.find((event) => event.active) ?? null;
+    return { cursor: -1, running: false, completed: false, beat: null, match: initialMatch, visibleEvents: initialMatch.events, captureEvent: activeEvent };
+  }
+  const beat = state.cursor >= 0 ? timeline[state.cursor] : null;
   const visibleIds = new Set(beat?.visibleEventIds ?? []);
   const visibleEvents = initialMatch.events
     .filter((event) => visibleIds.has(event.id))
@@ -62,7 +66,7 @@ export function buildReplayView(initialMatch: MatchRoomView, state: ReplayContro
     leadingShare,
   };
 
-  return { cursor: state.cursor, running: state.running, completed: state.cursor === demoReplayBeats.length - 1, beat, match, visibleEvents, captureEvent };
+  return { cursor: state.cursor, running: state.running, completed: state.cursor === timeline.length - 1, beat, match, visibleEvents, captureEvent };
 }
 
 export { DEMO_REPLAY_INTERVAL_MS, demoReplayBeats };

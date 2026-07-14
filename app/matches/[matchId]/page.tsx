@@ -1,18 +1,18 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/shell/app-shell";
-import { LiveMatchExperience } from "@/components/match/live-match-experience";
-import { getReplayConfig } from "@/lib/txline/replay-config";
-import { getDemoMatch } from "@/lib/txline/replay-fixture";
+import { MatchExperience } from "@/components/match/live-match-experience";
+import { getMatchExperienceDataset } from "@/lib/match/match-data-source";
 
-export default async function MatchPage({ params }: { params: Promise<{ matchId: string }> }) {
+export default async function MatchPage({ params, searchParams }: { params: Promise<{ matchId: string }>; searchParams: Promise<{ mode?: string }> }) {
   const { matchId } = await params;
-  const config = getReplayConfig();
-  if (matchId !== config.fixtureId) notFound();
-  const match = getDemoMatch(config.fixtureId, config.mode, config.label);
+  const { mode } = await searchParams;
+  let dataset;
+  try { dataset = getMatchExperienceDataset(matchId, mode); }
+  catch { notFound(); }
 
   return (
     <AppShell>
-      <LiveMatchExperience initialMatch={match} />
+      <MatchExperience dataset={dataset} />
     </AppShell>
   );
 }

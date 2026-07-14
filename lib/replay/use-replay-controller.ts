@@ -2,18 +2,19 @@
 
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type { MatchRoomView } from "@/lib/txline/replay-fixture";
+import type { ReplayBeat } from "./types";
 import { buildReplayView, DEMO_REPLAY_INTERVAL_MS, initialReplayControllerState, replayReducer } from "./replay-controller";
 
-export function useReplayController(initialMatch: MatchRoomView) {
-  const [state, dispatch] = useReducer(replayReducer, initialReplayControllerState);
+export function useReplayController(initialMatch: MatchRoomView, timeline: ReplayBeat[], autoAdvance: boolean) {
+  const [state, dispatch] = useReducer((current, action) => replayReducer(current, action, timeline), initialReplayControllerState);
   const [captureSeconds, setCaptureSeconds] = useState(0);
-  const view = useMemo(() => buildReplayView(initialMatch, state), [initialMatch, state]);
+  const view = useMemo(() => buildReplayView(initialMatch, state, timeline), [initialMatch, state, timeline]);
 
   useEffect(() => {
-    if (!state.running) return;
+    if (!autoAdvance || !state.running) return;
     const timer = window.setTimeout(() => dispatch({ type: "next" }), DEMO_REPLAY_INTERVAL_MS);
     return () => window.clearTimeout(timer);
-  }, [state.cursor, state.running]);
+  }, [autoAdvance, state.cursor, state.running]);
 
   useEffect(() => {
     setCaptureSeconds(view.beat?.captureSeconds ?? 0);

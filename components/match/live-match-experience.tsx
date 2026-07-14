@@ -11,22 +11,22 @@ import { TxlineStatusCard } from "./txline-status-card";
 import { MatchChatPreview } from "./match-chat-preview";
 import { CaptureWindowBanner } from "./capture-window-banner";
 import { ReplayControls } from "./replay-controls";
-import { demoReplayBeats } from "@/lib/replay/replay-controller";
 import { useReplayController } from "@/lib/replay/use-replay-controller";
 import type { MatchRoomView, OfficialEventView } from "@/lib/txline/replay-fixture";
+import type { MatchExperienceDataset } from "@/lib/match/match-data-source";
 import { useCallback, useState } from "react";
 
-export function LiveMatchExperience({ initialMatch }: { initialMatch: MatchRoomView }) {
-  const replay = useReplayController(initialMatch);
-  const messages = replay.beat?.conversation ?? [];
+export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }) {
+  const replay = useReplayController(dataset.match, dataset.timeline, dataset.autoAdvance);
+  const messages = replay.beat?.conversation ?? dataset.conversation;
   const [composerEvent, setComposerEvent] = useState<OfficialEventView | null>(null);
   const [publishedMoments, setPublishedMoments] = useState<MatchRoomView["moments"]>([]);
   const closeComposer = useCallback(() => setComposerEvent(null), []);
   const openComposer = (event: OfficialEventView) => { replay.pause(); setComposerEvent(event); };
   return (
     <div className="match-page page-frame">
-      <div className="replay-disclosure"><Radio size={15} /><span><strong>{initialMatch.modeLabel}</strong> — official events are replayed through the same UI contract planned for live TxLINE data.</span></div>
-      <ReplayControls cursor={replay.cursor} total={demoReplayBeats.length} running={replay.running} completed={replay.completed} beatLabel={replay.beat?.label ?? "Ready to begin"} onStart={replay.start} onNext={replay.next} onPause={replay.pause} onResume={replay.resume} onReset={replay.reset} onFinish={replay.finish} />
+      <div className="replay-disclosure"><Radio size={15} /><span><strong>{dataset.disclosure.label}</strong> — {dataset.disclosure.detail}</span></div>
+      {dataset.transportEnabled && <ReplayControls cursor={replay.cursor} total={dataset.timeline.length} running={replay.running} completed={replay.completed} beatLabel={replay.beat?.label ?? "Ready to begin"} onStart={replay.start} onNext={replay.next} onPause={replay.pause} onResume={replay.resume} onReset={replay.reset} onFinish={replay.finish} />}
       <div className="match-hero-grid">
         <motion.div key={`${replay.match.home.score}-${replay.match.away.score}-${replay.match.minute}`} initial={{ opacity: .82 }} animate={{ opacity: 1 }} transition={{ duration: .18 }}><MatchScoreboard match={replay.match} /></motion.div>
         <TxlineStatusCard mode={replay.match.mode} />
