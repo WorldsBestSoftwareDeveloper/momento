@@ -5,6 +5,8 @@ import { MatchScoreboard } from "@/components/match/match-scoreboard";
 import { OfficialEventRail } from "@/components/match/official-event-rail";
 import { MomentumMeter } from "@/components/match/momentum-meter";
 import { MomentCard } from "@/components/moment/moment-card";
+import { TxlineStatusCard } from "@/components/match/txline-status-card";
+import { MatchChatPreview } from "@/components/match/match-chat-preview";
 import { getReplayConfig } from "@/lib/txline/replay-config";
 import { getDemoMatch } from "@/lib/txline/replay-fixture";
 
@@ -18,7 +20,10 @@ export default async function MatchPage({ params }: { params: Promise<{ matchId:
     <AppShell>
       <div className="match-page page-frame">
         {match.mode === "replay" && <div className="replay-disclosure"><Radio size={15} /><span><strong>{match.modeLabel}</strong> — official events are replayed through the same UI contract planned for live TxLINE data.</span></div>}
-        <MatchScoreboard match={match} />
+        <div className="match-hero-grid">
+          <MatchScoreboard match={match} />
+          <TxlineStatusCard mode={match.mode} />
+        </div>
         <OfficialEventRail events={match.events} mode={match.mode} />
         <section className="capture-banner"><div><span className="eyebrow">Capture window</span><strong>58′ Goal • Spain</strong><p>Share your reaction to this official event.</p></div><button type="button" className="primary-button"><Video size={18} /> Capture this moment</button></section>
         <div className="match-content">
@@ -26,7 +31,10 @@ export default async function MatchPage({ params }: { params: Promise<{ matchId:
             <div className="section-heading"><div><span className="eyebrow">Fan-created content</span><h2>Fan reactions</h2></div><button className="sort-button" type="button">Most recent <ChevronDown size={15} /></button></div>
             <div className="moment-grid">{match.moments.map((moment, index) => <MomentCard key={moment.id} moment={moment} featured={index === 0} />)}</div>
           </section>
-          <MomentumMeter match={match} />
+          <div className="match-side-rail">
+            <MomentumMeter match={match} />
+            <MatchChatPreview />
+          </div>
         </div>
       </div>
     </AppShell>

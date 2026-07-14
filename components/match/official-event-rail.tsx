@@ -1,7 +1,7 @@
-import { Circle, Goal, Hand, ScanSearch, ShieldAlert, Timer } from "lucide-react";
+import { Circle, Goal, Hand, Timer } from "lucide-react";
 import type { EventKind, OfficialEventView } from "@/lib/txline/replay-fixture";
 
-const icons: Record<EventKind, typeof Circle> = { goal: Goal, save: Hand, card: ShieldAlert, var: ScanSearch, phase: Timer };
+const icons: Partial<Record<EventKind, typeof Circle>> = { goal: Goal, save: Hand, phase: Timer };
 
 export function OfficialEventRail({ events, mode }: { events: OfficialEventView[]; mode: "live" | "cached" | "replay" }) {
   return (
@@ -12,7 +12,8 @@ export function OfficialEventRail({ events, mode }: { events: OfficialEventView[
           const Icon = icons[event.kind];
           return (
             <button key={event.id} className={`event-token ${event.active ? "is-active" : ""}`} type="button" role="listitem" aria-label={`${event.minute} ${event.title}, ${event.team}`}>
-              <span className="event-minute">{event.minute}</span><Icon size={21} />
+              <span className="event-minute">{event.minute}</span>
+              {event.kind === "card" ? <i className="card-icon" aria-hidden="true" /> : event.kind === "var" ? <i className="var-icon" aria-hidden="true">VAR</i> : Icon ? <Icon size={21} /> : null}
               <span><strong>{event.title}</strong><small>{event.team}</small></span>
             </button>
           );

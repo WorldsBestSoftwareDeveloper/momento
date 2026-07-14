@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CircleUserRound, Radio, Search } from "lucide-react";
+import { Bell, CircleUserRound, Search } from "lucide-react";
 import { getReplayConfig } from "@/lib/txline/replay-config";
 
 export function DesktopHeader() {
@@ -11,10 +11,12 @@ export function DesktopHeader() {
         <Link href="/">Home</Link>
         <Link href={`/matches/${config.fixtureId}`} className="is-active">Live</Link>
         <a href="#moments">Moments</a>
+        <a href="#rankings">Rankings</a>
+        <a href="#profile">Profile</a>
       </nav>
       <div className="header-actions">
         <button className="icon-button" aria-label="Search" disabled><Search size={19} /></button>
-        <button className="data-button" type="button"><Radio size={16} /> Data status</button>
+        <button className="icon-button notification-button" aria-label="Notifications"><Bell size={18} /><i /></button>
         <button className="icon-button" aria-label="Profile"><CircleUserRound size={22} /></button>
       </div>
     </header>
