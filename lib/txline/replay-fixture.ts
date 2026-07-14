@@ -1,6 +1,6 @@
 import type { DataMode } from "./replay-config";
 
-export type EventKind = "goal" | "save" | "card" | "var" | "phase";
+export type EventKind = "goal" | "save" | "yellow-card" | "red-card" | "var" | "substitution" | "phase";
 
 export interface MatchTeamView {
   name: string;
@@ -43,6 +43,7 @@ export interface MatchRoomView {
   competition: string;
   stadium: string;
   state: "live" | "final";
+  statusLabel: string;
   minute: string;
   mode: DataMode;
   modeLabel: string;
@@ -66,6 +67,7 @@ export function getDemoMatch(
     competition: "World Cup Demo",
     stadium: "Demo match room",
     state: "live",
+    statusLabel: "Second half",
     minute: "68′",
     mode,
     modeLabel,
@@ -73,13 +75,14 @@ export function getDemoMatch(
     home: { name: "France", shortName: "France", code: "FRA", score: 1, tone: "blue" },
     away: { name: "Spain", shortName: "Spain", code: "ESP", score: 1, tone: "red" },
     events: [
+      { id: "evt-kickoff", minute: "1′", kind: "phase", title: "Kickoff", team: "First half", confirmed: true },
       { id: "evt-goal-france", minute: "12′", kind: "goal", title: "Goal", team: "France", confirmed: true },
-      { id: "evt-save-spain", minute: "27′", kind: "save", title: "Save", team: "Spain", confirmed: true },
-      { id: "evt-card-spain", minute: "33′", kind: "card", title: "Yellow card", team: "Spain", confirmed: true },
+      { id: "evt-card-spain", minute: "33′", kind: "yellow-card", title: "Yellow card", team: "Spain", confirmed: true },
       { id: "evt-var", minute: "45+1′", kind: "var", title: "VAR check", team: "Spain penalty", confirmed: true },
-      { id: "evt-goal-spain", minute: "58′", kind: "goal", title: "Goal", team: "Spain", confirmed: true, active: true },
-      { id: "evt-card-france", minute: "63′", kind: "card", title: "Yellow card", team: "France", confirmed: true },
-      { id: "evt-live", minute: "68′", kind: "phase", title: "Live", team: "Second half", confirmed: true },
+      { id: "evt-sub-france", minute: "52′", kind: "substitution", title: "Substitution", team: "France", confirmed: true },
+      { id: "evt-goal-spain", minute: "58′", kind: "goal", title: "Goal", team: "Spain", confirmed: true },
+      { id: "evt-red-france", minute: "88′", kind: "red-card", title: "Red card", team: "France", confirmed: true },
+      { id: "evt-final", minute: "FT", kind: "phase", title: "Full time", team: "Final whistle", confirmed: true },
     ],
     moments: [
       {
@@ -134,8 +137,8 @@ export function getDemoMatch(
         handle: "@chloe_fra",
         title: "That silence before the roar",
         caption: "The whole room held its breath.",
-        eventId: "evt-save-spain",
-        eventLabel: "27′ Save • Spain",
+        eventId: "evt-sub-france",
+        eventLabel: "52′ Substitution • France",
         durationSeconds: 11,
         championCount: 640,
         videoPath: "/demo/reaction-france-02.mp4",

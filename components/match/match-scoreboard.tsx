@@ -20,7 +20,7 @@ export function MatchScoreboard({ match, compact = false }: { match: MatchRoomVi
       </div>
       <div className="scoreboard-main">
         <Team team={match.home} side="home" />
-        <div className="match-clock"><strong>{match.minute}</strong><span>{match.state === "live" ? "Second half" : "Full time"}</span></div>
+        <div className="match-clock" aria-live="polite"><strong key={`${match.minute}-${match.home.score}-${match.away.score}`}>{match.minute}</strong><span>{match.statusLabel}</span></div>
         <Team team={match.away} side="away" />
       </div>
       <div className="scoreboard-foot"><span>Powered by <strong>TxLINE</strong></span><span>{match.updatedAtLabel}</span></div>
