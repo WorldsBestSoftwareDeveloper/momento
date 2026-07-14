@@ -18,3 +18,24 @@ coverage/
 *keypair*.json
 id.json
 .config/solana/
+
+# Internal product and implementation planning (kept locally, not published).
+/ANIMATION_SPEC.md
+/API_SPEC.md
+/BUILD_ORDER.md
+/COMPONENT_LIBRARY.md
+/DATABASE_SCHEMA.md
+/DEMO_REPLAY_SPEC.md
+/DEMO_SCRIPT.md
+/DESIGN_SYSTEM.md
+/FEATURE_BREAKDOWN.md
+/FOLDER_STRUCTURE.md
+/HACKATHON_WIN_STRATEGY.md
+/IMPLEMENTATION_PLAN.md
+/PRODUCT_REQUIREMENTS.md
+/RISKS_AND_BACKUPS.md
+/SOLANA_ARCHITECTURE.md
+/SYSTEM_ARCHITECTURE.md
+/TXLINE_INTEGRATION.md
+/UI_UX_SPEC.md
+/docs/assets/momento-ui-concept.png
