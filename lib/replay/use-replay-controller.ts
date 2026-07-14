@@ -20,10 +20,10 @@ export function useReplayController(initialMatch: MatchRoomView) {
   }, [view.beat?.id, view.beat?.captureSeconds]);
 
   useEffect(() => {
-    if (!view.captureEvent || captureSeconds <= 0) return;
+    if (!state.running || !view.captureEvent || captureSeconds <= 0) return;
     const timer = window.setInterval(() => setCaptureSeconds((seconds) => Math.max(0, seconds - 1)), 1000);
     return () => window.clearInterval(timer);
-  }, [view.captureEvent, captureSeconds]);
+  }, [state.running, view.captureEvent, captureSeconds]);
 
   return {
     ...view,

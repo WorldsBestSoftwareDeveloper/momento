@@ -35,6 +35,10 @@ export interface MomentView {
   initials: string;
   rank: number;
   isWinner?: boolean;
+  description?: string;
+  createdAtLabel?: string;
+  commentCount?: number;
+  txlineVerified?: boolean;
 }
 
 export interface MatchRoomView {
@@ -100,6 +104,9 @@ export function getDemoMatch(
         initials: "LM",
         rank: 1,
         isWinner: true,
+        createdAtLabel: "2m ago",
+        commentCount: 84,
+        txlineVerified: true,
       },
       {
         id: "moment-paula",
@@ -115,6 +122,9 @@ export function getDemoMatch(
         posterTone: "red",
         initials: "PR",
         rank: 2,
+        createdAtLabel: "5m ago",
+        commentCount: 61,
+        txlineVerified: true,
       },
       {
         id: "moment-theo",
@@ -130,6 +140,9 @@ export function getDemoMatch(
         posterTone: "violet",
         initials: "TB",
         rank: 3,
+        createdAtLabel: "8m ago",
+        commentCount: 43,
+        txlineVerified: true,
       },
       {
         id: "moment-chloe",
@@ -145,6 +158,9 @@ export function getDemoMatch(
         posterTone: "blue",
         initials: "CM",
         rank: 4,
+        createdAtLabel: "11m ago",
+        commentCount: 28,
+        txlineVerified: true,
       },
       {
         id: "moment-javi",
@@ -160,6 +176,9 @@ export function getDemoMatch(
         posterTone: "red",
         initials: "JO",
         rank: 5,
+        createdAtLabel: "14m ago",
+        commentCount: 19,
+        txlineVerified: true,
       },
     ],
     leadingShare: 42,
