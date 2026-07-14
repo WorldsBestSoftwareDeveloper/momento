@@ -8,7 +8,6 @@ import { MomentumMeter } from "./momentum-meter";
 import { MomentFeed } from "@/components/moment/moment-feed";
 import { MomentComposer } from "@/components/moment/moment-composer";
 import { TxlineStatusCard } from "./txline-status-card";
-import { MatchChatPreview } from "./match-chat-preview";
 import { CaptureWindowBanner } from "./capture-window-banner";
 import { ReplayControls } from "./replay-controls";
 import { useReplayController } from "@/lib/replay/use-replay-controller";
@@ -18,7 +17,6 @@ import { useCallback, useState } from "react";
 
 export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }) {
   const replay = useReplayController(dataset.match, dataset.timeline, dataset.autoAdvance);
-  const messages = replay.beat?.conversation ?? dataset.conversation;
   const [composerEvent, setComposerEvent] = useState<OfficialEventView | null>(null);
   const [publishedMoments, setPublishedMoments] = useState<MatchRoomView["moments"]>([]);
   const closeComposer = useCallback(() => setComposerEvent(null), []);
@@ -41,7 +39,6 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
         </section>
         <div className="match-side-rail" id="rankings">
           <MomentumMeter match={replay.match} />
-          <MatchChatPreview messages={messages} />
         </div>
       </div>
       {composerEvent && <MomentComposer event={composerEvent} open onClose={closeComposer} onPublished={(moment) => setPublishedMoments((current) => [moment, ...current])} />}
