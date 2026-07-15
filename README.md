@@ -1,0 +1,57 @@
+# Momento
+
+Momento transforms every official football event into a shared social experience where fans capture, champion and collectively decide the defining moment of every match.
+
+The hackathon build uses TxLINE for canonical fixtures, official score actions, historical replay, and live SSE updates. UI components receive one normalized match model and never access TxLINE credentials or raw payloads.
+
+## Run locally
+
+Requirements: Node.js 20+, npm, and optional TxLINE/Supabase credentials.
+
+```powershell
+npm install
+Copy-Item .env.example .env.local
+npm run dev
+```
+
+Open `http://localhost:3000/matches/france-spain-demo`.
+
+- `?mode=replay` selects deterministic historical replay.
+- `?mode=live` selects authenticated snapshots and SSE.
+- Without TxLINE credentials, replay remains available and live mode shows setup guidance.
+- Without Supabase credentials, community interactions use the local demo repository.
+
+## TxLINE server configuration
+
+```env
+DEMO_MODE=true
+DEMO_FIXTURE_ID=france-spain-demo
+TXLINE_API_ORIGIN=https://txline-dev.txodds.com
+TXLINE_FIXTURE_ID=18237038
+TXLINE_GUEST_JWT=your-guest-jwt
+TXLINE_API_TOKEN=your-activated-api-token
+```
+
+`TXLINE_GUEST_JWT` and `TXLINE_API_TOKEN` are server-only. Never prefix them with `NEXT_PUBLIC_`.
+
+Devnet activation is available through `npx tsx scripts/activate-txline.ts`. It uses service level 1 for four weeks with `SELECTED_LEAGUES=[]`, saves nothing, and prints the credentials for manual storage.
+
+## Data paths
+
+- Fixtures: `GET /api/fixtures/snapshot`
+- Score snapshot: `GET /api/scores/snapshot/{fixtureId}`
+- Historical replay: `GET /api/scores/historical/{fixtureId}`
+- Live score stream: `GET /api/scores/stream`
+
+The browser connects only to Momento’s normalized `/api/txline/match` and `/api/txline/stream` routes.
+
+## Validation
+
+```powershell
+npm run typecheck
+npm run lint
+npm run build
+```
+
+See [JUDGE_SETUP.md](JUDGE_SETUP.md) for the demo and deployment checklist.
+

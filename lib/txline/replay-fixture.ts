@@ -51,6 +51,7 @@ export interface MatchRoomView {
   minute: string;
   mode: DataMode;
   modeLabel: string;
+  txlineVerified: boolean;
   updatedAtLabel: string;
   home: MatchTeamView;
   away: MatchTeamView;
@@ -75,6 +76,7 @@ export function getDemoMatch(
     minute: "68′",
     mode,
     modeLabel,
+    txlineVerified: false,
     updatedAtLabel: "Original event time • demo sequence",
     home: { name: "France", shortName: "France", code: "FRA", score: 1, tone: "blue" },
     away: { name: "Spain", shortName: "Spain", code: "ESP", score: 1, tone: "red" },
@@ -106,7 +108,7 @@ export function getDemoMatch(
         isWinner: true,
         createdAtLabel: "2m ago",
         commentCount: 84,
-        txlineVerified: true,
+        txlineVerified: false,
       },
       {
         id: "moment-paula",
@@ -124,7 +126,7 @@ export function getDemoMatch(
         rank: 2,
         createdAtLabel: "5m ago",
         commentCount: 61,
-        txlineVerified: true,
+        txlineVerified: false,
       },
       {
         id: "moment-theo",
@@ -142,7 +144,7 @@ export function getDemoMatch(
         rank: 3,
         createdAtLabel: "8m ago",
         commentCount: 43,
-        txlineVerified: true,
+        txlineVerified: false,
       },
       {
         id: "moment-chloe",
@@ -160,7 +162,7 @@ export function getDemoMatch(
         rank: 4,
         createdAtLabel: "11m ago",
         commentCount: 28,
-        txlineVerified: true,
+        txlineVerified: false,
       },
       {
         id: "moment-javi",
@@ -178,7 +180,7 @@ export function getDemoMatch(
         rank: 5,
         createdAtLabel: "14m ago",
         commentCount: 19,
-        txlineVerified: true,
+        txlineVerified: false,
       },
     ],
     leadingShare: 42,

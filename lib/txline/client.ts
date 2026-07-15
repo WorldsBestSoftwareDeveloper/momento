@@ -4,6 +4,7 @@ import type {
   TxlineRequestOptions,
 } from "./types";
 import { TXLINE_DEVNET } from "./types";
+import { TxlineApiError } from "./types";
 
 export class TxlineClient {
   private guestJwt: string;
@@ -38,17 +39,37 @@ export class TxlineClient {
     const body = await response.text();
     if (!response.ok) {
       const detail = body.trim() ? `: ${body}` : "";
-      throw new Error(
+      throw new TxlineApiError(
         `TxLINE request failed (${response.status} ${response.statusText})${detail}`,
+        response.status,
+        response.status === 401 ? "UNAUTHORIZED" : response.status === 403 ? "FORBIDDEN" : "UPSTREAM",
       );
     }
 
     if (!body) return undefined as T;
+    if (body.trimStart().startsWith("data:")) {
+      const records = body.split(/\r?\n/).flatMap((line) => {
+        if (!line.startsWith("data:")) return [];
+        try { return [JSON.parse(line.slice(5).trim())]; } catch { return []; }
+      });
+      return records as T;
+    }
     return JSON.parse(body) as T;
   }
 
   get<T>(path: string, options?: TxlineRequestOptions): Promise<T> {
     return this.request<T>(path, { ...options, method: "GET" });
+  }
+
+  async stream(path: string, signal?: AbortSignal): Promise<Response> {
+    const url = `${this.apiOrigin}/api/${path.replace(/^\/+/, "")}`;
+    let response = await this.send(url, { method: "GET", signal, headers: { Accept: "text/event-stream", "Cache-Control": "no-cache" } });
+    if (response.status === 401) {
+      this.guestJwt = await requestGuestJwt(this.apiOrigin, this.fetchImpl);
+      response = await this.send(url, { method: "GET", signal, headers: { Accept: "text/event-stream", "Cache-Control": "no-cache" } });
+    }
+    if (!response.ok) throw this.error(response.status, response.statusText);
+    return response;
   }
 
   private send(url: string, options: RequestInit): Promise<Response> {
@@ -57,6 +78,12 @@ export class TxlineClient {
     headers.set("Authorization", `Bearer ${this.guestJwt}`);
     headers.set("X-Api-Token", this.apiToken);
 
-    return this.fetchImpl(url, { ...options, headers });
+    return this.fetchImpl(url, { ...options, headers, signal: options.signal ?? AbortSignal.timeout(15_000) });
+  }
+
+
+  private error(status: number, detail: string) {
+    const code = status === 401 ? "UNAUTHORIZED" : status === 403 ? "FORBIDDEN" : "UPSTREAM";
+    return new TxlineApiError(`TxLINE request failed (${status} ${detail})`, status, code);
   }
 }

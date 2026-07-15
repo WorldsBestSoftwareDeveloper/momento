@@ -7,7 +7,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const { matchId } = await params;
   const { mode } = await searchParams;
   let dataset;
-  try { dataset = getMatchExperienceDataset(matchId, mode); }
+  try { dataset = await getMatchExperienceDataset(matchId, mode); }
   catch { notFound(); }
 
   return (

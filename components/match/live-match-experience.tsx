@@ -14,9 +14,11 @@ import { useReplayController } from "@/lib/replay/use-replay-controller";
 import type { MatchRoomView, OfficialEventView } from "@/lib/txline/replay-fixture";
 import type { MatchExperienceDataset } from "@/lib/match/match-data-source";
 import { useCallback, useState } from "react";
+import { useLiveMatchSource } from "@/lib/match/use-live-match-source";
 
 export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }) {
-  const replay = useReplayController(dataset.match, dataset.timeline, dataset.autoAdvance);
+  const sourceMatch = useLiveMatchSource(dataset);
+  const replay = useReplayController(sourceMatch, dataset.timeline, dataset.autoAdvance);
   const [composerEvent, setComposerEvent] = useState<OfficialEventView | null>(null);
   const [publishedMoments, setPublishedMoments] = useState<MatchRoomView["moments"]>([]);
   const closeComposer = useCallback(() => setComposerEvent(null), []);
@@ -27,9 +29,9 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
       {dataset.transportEnabled && <ReplayControls cursor={replay.cursor} total={dataset.timeline.length} running={replay.running} completed={replay.completed} beatLabel={replay.beat?.label ?? "Ready to begin"} onStart={replay.start} onNext={replay.next} onPause={replay.pause} onResume={replay.resume} onReset={replay.reset} onFinish={replay.finish} />}
       <div className="match-hero-grid">
         <motion.div key={`${replay.match.home.score}-${replay.match.away.score}-${replay.match.minute}`} initial={{ opacity: .82 }} animate={{ opacity: 1 }} transition={{ duration: .18 }}><MatchScoreboard match={replay.match} /></motion.div>
-        <TxlineStatusCard mode={replay.match.mode} />
+        <TxlineStatusCard mode={replay.match.mode} verified={replay.match.txlineVerified} />
       </div>
-      <OfficialEventRail events={replay.visibleEvents} mode={replay.match.mode} />
+      <OfficialEventRail events={replay.visibleEvents} mode={replay.match.mode} verified={replay.match.txlineVerified} />
       <AnimatePresence mode="wait">
         {replay.captureEvent && <motion.div key={replay.captureEvent.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: .28 }}><CaptureWindowBanner event={replay.captureEvent} seconds={replay.captureSeconds} onCapture={() => openComposer(replay.captureEvent!)} /></motion.div>}
       </AnimatePresence>

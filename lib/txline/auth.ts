@@ -17,6 +17,7 @@ export async function requestGuestJwt(
   const response = await fetchImpl(`${apiOrigin}/auth/guest/start`, {
     method: "POST",
     headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(15_000),
   });
   const body = await response.text();
 
@@ -63,6 +64,7 @@ export async function activateApiToken(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(activation),
+    signal: AbortSignal.timeout(15_000),
   });
   const body = await response.text();
 
