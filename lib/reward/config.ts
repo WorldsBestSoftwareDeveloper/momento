@@ -7,7 +7,7 @@ function rewardAmount() {
 }
 
 export function rewardsEnabled() {
-  return process.env.NEXT_PUBLIC_REWARDS_ENABLED !== "false";
+  return process.env.NEXT_PUBLIC_REWARDS_ENABLED === "true";
 }
 
 export function createDemoCreatorReward(input: Omit<CreatorReward, "amountSol" | "network" | "eligibleWallet">): CreatorReward {
@@ -16,7 +16,7 @@ export function createDemoCreatorReward(input: Omit<CreatorReward, "amountSol" |
 }
 
 export function createMatchCreatorReward(match: MatchRoomView): CreatorReward {
-  const winner = match.moments.find((moment) => moment.isWinner) ?? match.moments[0];
+  const winner = match.moments.find((moment) => moment.isWinner) ?? match.moments[0] ?? { id: "pending", creator: "Awaiting result", handle: "@momento", title: "Winning Moment pending", championCount: 0 };
   return createDemoCreatorReward({
     id: `${match.providerFixtureId || match.id}:${winner.id}`,
     matchId: match.id,

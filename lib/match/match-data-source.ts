@@ -65,7 +65,7 @@ function liveSetupDataset(fixtureId: string, detail: string): MatchExperienceDat
 
 async function createLiveDataset(fixtureId: string): Promise<MatchExperienceDataset> {
   const config = getTxlineRuntimeConfig();
-  if (!config.configured) return replayFallback(fixtureId);
+  if (!config.configured) return liveSetupDataset(fixtureId, "Add TxLINE credentials to connect the official live feed. Historical Replay remains available.");
   try {
     const [fixture, updates] = await Promise.all([
       getFixture(config.fixtureId),
