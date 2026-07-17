@@ -6,6 +6,6 @@ import { getDemoMatch } from "@/lib/txline/replay-fixture";
 
 export default function ProfilePage() {
   const config = getReplayConfig();
-  const reward = createMatchCreatorReward(getDemoMatch(config.fixtureId, config.mode, config.label));
+  const reward = createMatchCreatorReward(getDemoMatch(config.matchId, config.mode, config.label));
   return <AppShell><div className="profile-page page-frame"><CreatorProfile reward={reward} /></div></AppShell>;
 }

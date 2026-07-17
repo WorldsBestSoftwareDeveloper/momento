@@ -8,7 +8,7 @@ import { getDemoMatch } from "@/lib/txline/replay-fixture";
 
 export default function HomePage() {
   const config = getReplayConfig();
-  const match = getDemoMatch(config.fixtureId, config.mode, config.label);
+  const match = getDemoMatch(config.matchId, config.mode, config.label);
 
   return (
     <AppShell>
@@ -18,14 +18,14 @@ export default function HomePage() {
           <div className="intro-proof"><Sparkles /><strong>Capture the Moment.</strong><span>Champion It. Relive It.</span></div>
         </section>
         <section className="featured-match">
-          <div className="featured-top"><div><span className="eyebrow">Featured match</span><h2>Enter the live room</h2></div><Radio size={20} /></div>
+          <div className="featured-top"><div><span className="eyebrow">Featured match</span><h2>Enter the match room</h2></div><Radio size={20} /></div>
           <MatchScoreboard match={match} compact />
-          <div className="featured-actions"><div><History /><span><strong>Replay ready</strong>Seven deterministic demo beats</span></div><Link href={`/matches/${match.id}`} className="primary-button">Open match room <ArrowRight size={17} /></Link></div>
+          <div className="featured-actions"><div><History /><span><strong>Official archive ready</strong>Seven chapters from the match timeline</span></div><Link href={`/matches/${match.id}`} className="primary-button">Open match room <ArrowRight size={17} /></Link></div>
         </section>
         <section className="home-info-grid">
-          <article><span>01</span><h3>Follow the official event</h3><p>TxLINE-shaped match facts establish the shared context.</p></article>
+          <article><span>01</span><h3>Follow the official event</h3><p>Official TxLINE match updates keep every fan in sync.</p></article>
           <article><span>02</span><h3>Capture your reaction</h3><p>Attach a short fan-created Moment to the event that caused it.</p></article>
-          <article><span>03</span><h3>Champion what mattered</h3><p>The community collectively chooses the defining Moment.</p></article>
+          <article><span>03</span><h3>Champion what mattered</h3><p>Celebrate the Moments you appreciate, or Support the one you believe should win.</p></article>
         </section>
       </div>
     </AppShell>

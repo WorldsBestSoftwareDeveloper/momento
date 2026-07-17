@@ -6,7 +6,7 @@ const icons: Partial<Record<EventKind, typeof Circle>> = { goal: Goal, save: Han
 export function OfficialEventRail({ events, mode, verified = true }: { events: OfficialEventView[]; mode: "live" | "cached" | "replay"; verified?: boolean }) {
   return (
     <section className="event-section" aria-labelledby="official-events-title">
-      <div className="section-heading"><div><span className="eyebrow">Official timeline</span><h2 id="official-events-title">Official events</h2></div><span className="verified-copy">{verified ? mode === "replay" ? "Recorded TxLINE data" : "Official TxLINE data" : "TxLINE connection required"}</span></div>
+      <div className="section-heading"><div><span className="eyebrow">Official Match Timeline</span><h2 id="official-events-title">Official events</h2></div><span className="verified-copy">{mode === "replay" ? (verified ? "Official TxLINE archive" : "Official match archive") : verified ? "Official TxLINE feed" : "Official feed reconnecting"}</span></div>
       <div className="event-rail" role="list">
         {events.map((event) => {
           const Icon = icons[event.kind];

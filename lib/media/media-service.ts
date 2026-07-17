@@ -37,8 +37,8 @@ export const browserMediaService: MediaService = {
   },
   async getDemoFile() {
     const response = await fetch("/demo/upload-placeholder.mp4");
-    if (!response.ok) throw new Error("The demo clip is temporarily unavailable.");
-    return new File([await response.blob()], "momento-demo-reaction.mp4", { type: "video/mp4" });
+    if (!response.ok) throw new Error("The featured reaction clip is temporarily unavailable.");
+    return new File([await response.blob()], "momento-featured-reaction.mp4", { type: "video/mp4" });
   },
   releasePreview(url) { URL.revokeObjectURL(url); },
 };

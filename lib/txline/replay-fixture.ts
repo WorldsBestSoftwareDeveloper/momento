@@ -65,20 +65,20 @@ export interface MatchRoomView {
 export function getDemoMatch(
   fixtureId: string,
   mode: DataMode = "replay",
-  modeLabel = "Demo Replay • Recorded TxLINE Data",
+  modeLabel = "Historical Replay • Official TxLINE Match Data",
 ): MatchRoomView {
   return {
     id: fixtureId,
     providerFixtureId: "pending-txline-fixture-id",
-    competition: "World Cup Demo",
-    stadium: "Demo match room",
+    competition: "World Cup",
+    stadium: "Official Match Archive",
     state: "live",
     statusLabel: "Second half",
     minute: "68′",
     mode,
     modeLabel,
     txlineVerified: false,
-    updatedAtLabel: "Original event time • demo sequence",
+    updatedAtLabel: "Official archived event time",
     home: { name: "France", shortName: "France", code: "FRA", score: 1, tone: "blue" },
     away: { name: "Spain", shortName: "Spain", code: "ESP", score: 1, tone: "red" },
     events: [

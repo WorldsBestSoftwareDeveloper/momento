@@ -67,7 +67,7 @@ export function MomentComposer({ matchId, event, open, onClose, onPublished }: {
 
   const selectDemoFile = async () => {
     try { await selectFile(await browserMediaService.getDemoFile()); }
-    catch (error) { setErrors((current) => ({ ...current, video: error instanceof Error ? error.message : "The demo clip is unavailable." })); setStatus("error"); }
+    catch (error) { setErrors((current) => ({ ...current, video: error instanceof Error ? error.message : "The featured reaction clip is unavailable." })); setStatus("error"); }
   };
 
   const publish = async () => {
@@ -109,7 +109,7 @@ export function MomentComposer({ matchId, event, open, onClose, onPublished }: {
             <input ref={inputRef} className="visually-hidden" type="file" accept="video/mp4" onChange={(changeEvent) => selectFile(changeEvent.target.files?.[0])} />
             {preview ? <VideoPreview url={preview.url} durationSeconds={preview.durationSeconds} onRemove={resetMedia} onReplace={() => inputRef.current?.click()} /> : <><button type="button" className={`video-dropzone ${dragging ? "is-dragging" : ""} ${errors.video ? "has-error" : ""}`} onClick={() => inputRef.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); selectFile(event.dataTransfer.files[0]); }}>
               <span className="dropzone-icon"><Film /></span><strong>Drop your reaction here</strong><span>or choose an MP4 from your device</span><small>Up to {MAX_VIDEO_SECONDS} seconds • {MAX_VIDEO_BYTES / 1024 / 1024} MB</small>
-            </button><button type="button" className="demo-clip-button" onClick={selectDemoFile}>Use 4-second demo clip</button></>}
+            </button><button type="button" className="demo-clip-button" onClick={selectDemoFile}>Use featured reaction clip</button></>}
             {errors.video && <p className="field-error">{errors.video}</p>}
             <p className="copyright-note"><ShieldCheck size={14} /> Upload only your own reaction—never broadcast match footage.</p>
           </div>

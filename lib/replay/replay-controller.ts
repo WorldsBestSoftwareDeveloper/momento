@@ -58,7 +58,7 @@ export function buildReplayView(initialMatch: MatchRoomView, state: ReplayContro
     ...initialMatch,
     minute: "—",
     state: "live",
-    statusLabel: "Replay ready",
+    statusLabel: "Archive ready",
     home: { ...initialMatch.home, score: 0 },
     away: { ...initialMatch.away, score: 0 },
     moments,

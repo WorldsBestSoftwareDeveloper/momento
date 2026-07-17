@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MomentView } from "@/lib/txline/replay-fixture";
 import { activityService, championService, commentService, type CommunityComment } from "./services";
 import type { CommunitySnapshot } from "./types";
@@ -13,14 +13,23 @@ export function useMomentCommunity(moment: MomentView) {
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pendingChampion = useRef<boolean | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const [nextSnapshot, nextComments] = await Promise.all([activityService.getSnapshot(moment), commentService.list(moment)]);
-      setSnapshot(nextSnapshot);
+      setSnapshot(() => {
+        const pending = pendingChampion.current;
+        if (pending === null || pending === nextSnapshot.championed) return nextSnapshot;
+        return {
+          ...nextSnapshot,
+          championed: pending,
+          championCount: Math.max(0, nextSnapshot.championCount + (pending ? 1 : -1)),
+        };
+      });
       setComments(nextComments);
       setError(null);
-    } catch { setError("Community is reconnecting. Your demo data is still available."); }
+    } catch { setError("Community activity is reconnecting. Your current view remains available."); }
   }, [moment]);
 
   useEffect(() => {
@@ -38,11 +47,14 @@ export function useMomentCommunity(moment: MomentView) {
     const previous = snapshot;
     const desired = !snapshot.championed;
     setBusy(true);
+    pendingChampion.current = desired;
     setSnapshot((current) => ({ ...current, championed: desired, championCount: Math.max(0, current.championCount + (desired ? 1 : -1)) }));
     try {
       const result = await championService.setChampion(moment, desired);
+      pendingChampion.current = null;
       setSnapshot((current) => ({ ...current, championed: result.championed, championCount: result.count }));
     } catch {
+      pendingChampion.current = null;
       setSnapshot(previous);
       setError("Could not update your Champion. Try again.");
     } finally { setBusy(false); }
@@ -56,4 +68,3 @@ export function useMomentCommunity(moment: MomentView) {
 
   return { snapshot, comments, busy, error, toggleChampion, addComment };
 }
-

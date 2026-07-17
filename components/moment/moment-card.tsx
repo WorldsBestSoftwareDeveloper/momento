@@ -57,7 +57,7 @@ export function MomentCard({ matchId, moment, mode, featured = false, onOpen }: 
       <OpinionChampion compact matchId={matchId} momentId={moment.id} mode={mode} championed={snapshot.championed} count={snapshot.championCount} busy={busy} onChampion={toggleChampion} />
     </div>
     <div className="moment-social-proof"><span><MessageCircle size={13} /> {snapshot.commentCount} comments</span><span>{snapshot.championCount.toLocaleString()} Champions</span></div>
-    <div className={`community-rank ${moment.rank === 1 ? "is-leading" : ""}`}>{moment.rank === 1 ? "🏆 Leading" : `#${moment.rank} by Community Support`}</div>
-    <MomentMarketSummary matchId={matchId} moment={{ ...moment, championCount: snapshot.championCount }} compact />
+    <div className={`community-rank ${moment.rank === 1 ? "is-leading" : ""}`}>{moment.rank === 1 ? (mode === "replay" ? "🏆 Leading historical support" : "🏆 Leading Support Pool") : (mode === "replay" ? `#${moment.rank} • Historical support` : `#${moment.rank} • Support Pool ranking`)}</div>
+    <MomentMarketSummary matchId={matchId} moment={{ ...moment, championCount: snapshot.championCount }} mode={mode} compact />
   </article>;
 }

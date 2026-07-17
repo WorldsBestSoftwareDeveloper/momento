@@ -69,7 +69,11 @@ export class SupabaseChampionRepository implements ChampionRepository {
     return { championed, count: await this.count(momentId) };
   }
   subscribe(momentId: string, listener: () => void) {
-    const channel = this.client.channel(`champions:${momentId}:${crypto.randomUUID()}`).on("postgres_changes", { event: "*", schema: "public", table: "champions", filter: `moment_id=eq.${momentId}` }, listener).subscribe();
+    const channel = this.client.channel(`champions:${momentId}:${crypto.randomUUID()}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "champions", filter: `moment_id=eq.${momentId}` }, listener)
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") listener();
+      });
     return unsubscribe(this.client, channel);
   }
 }

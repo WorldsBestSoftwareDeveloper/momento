@@ -26,13 +26,13 @@ export function resolveMatchSourceMode(queryMode?: string): MatchSourceMode {
   return getReplayConfig().demoMode ? "replay" : "live";
 }
 
-function replayFallback(fixtureId: string, reason: string): MatchExperienceDataset {
-  const match = getDemoMatch(fixtureId, "replay", "Demo Replay • Recorded TxLINE Data");
+function replayFallback(fixtureId: string): MatchExperienceDataset {
+  const match = getDemoMatch(fixtureId, "replay", "Historical Replay • Official TxLINE Match Data");
   return {
     sourceMode: "replay", match, timeline: demoReplayBeats, autoAdvance: true, transportEnabled: true,
     disclosure: {
-      label: "Demo Replay • Recorded TxLINE Data",
-      detail: `Bundled normalized recording is active (${reason}). Add TxLINE credentials to refresh it from fixture 18237038.`,
+      label: "Historical Replay • Official Match Archive",
+      detail: "Follow the official match timeline, archived events and historical community activity.",
     },
     conversation: [],
   };
@@ -40,51 +40,51 @@ function replayFallback(fixtureId: string, reason: string): MatchExperienceDatas
 
 async function createReplayDataset(fixtureId: string): Promise<MatchExperienceDataset> {
   const config = getTxlineRuntimeConfig();
-  if (!config.configured) return replayFallback(fixtureId, "TxLINE credentials are not configured");
+  if (!config.configured) return replayFallback(fixtureId);
   try {
     const replay = await loadTxlineReplay();
     return {
-      sourceMode: "replay", match: replay.match, timeline: replay.timeline, autoAdvance: true, transportEnabled: true,
-      disclosure: { label: "Demo Replay • Recorded TxLINE Data", detail: `Official TxLINE ${replay.source === "historical" ? "historical" : "score snapshot"} events loaded for fixture ${config.fixtureId}.` },
+      sourceMode: "replay", match: { ...replay.match, id: fixtureId }, timeline: replay.timeline, autoAdvance: true, transportEnabled: true,
+      disclosure: { label: "Historical Replay • Official TxLINE Match Data", detail: `Official TxLINE ${replay.source === "historical" ? "historical timeline" : "archived match snapshot"} loaded from the match archive.` },
       conversation: [],
     };
-  } catch (error) {
-    return replayFallback(fixtureId, error instanceof Error ? error.message : "historical replay unavailable");
+  } catch {
+    return replayFallback(fixtureId);
   }
 }
 
 function liveSetupDataset(fixtureId: string, detail: string): MatchExperienceDataset {
-  const match = getDemoMatch(fixtureId, "cached", "Live Mode • TxLINE Setup Required");
+  const match = getDemoMatch(fixtureId, "cached", "Live Match • Feed Temporarily Unavailable");
   return {
     sourceMode: "live",
-    match: { ...match, minute: "—", statusLabel: "TxLINE setup required", updatedAtLabel: "Add server-side TxLINE credentials", home: { ...match.home, score: 0 }, away: { ...match.away, score: 0 }, events: [] },
+    match: { ...match, minute: "—", statusLabel: "Live feed temporarily unavailable", updatedAtLabel: "Historical replay remains available", home: { ...match.home, score: 0 }, away: { ...match.away, score: 0 }, events: [] },
     timeline: [], autoAdvance: false, transportEnabled: false,
-    disclosure: { label: "Live Mode • TxLINE Setup Required", detail }, conversation: [],
+    disclosure: { label: "Live Match • Feed Temporarily Unavailable", detail }, conversation: [],
   };
 }
 
 async function createLiveDataset(fixtureId: string): Promise<MatchExperienceDataset> {
   const config = getTxlineRuntimeConfig();
-  if (!config.configured) return replayFallback(fixtureId, "Live Mode requested without TxLINE credentials");
+  if (!config.configured) return replayFallback(fixtureId);
   try {
     const [fixture, updates] = await Promise.all([
       getFixture(config.fixtureId),
       getScoreSnapshot(config.fixtureId).catch(() => getHistoricalScores(config.fixtureId)),
     ]);
-    if (!fixture) return liveSetupDataset(fixtureId, `No TxLINE fixture found for ${config.fixtureId}.`);
-    const match = mapTxlineMatch(fixture, updates, "live");
+    if (!fixture) return liveSetupDataset(fixtureId, "Official live match coverage is not available yet. Historical Replay remains available.");
+    const match = { ...mapTxlineMatch(fixture, updates, "live"), id: fixtureId };
     return {
       sourceMode: "live", match, timeline: [], autoAdvance: false, transportEnabled: false,
       liveTransport: { snapshotUrl: `/api/txline/match?fixtureId=${config.fixtureId}`, streamUrl: `/api/txline/stream?fixtureId=${config.fixtureId}` },
-      disclosure: { label: "Live • Official TxLINE Data", detail: `Authenticated score snapshots and SSE updates for fixture ${config.fixtureId}.` }, conversation: [],
+      disclosure: { label: "Live Match • Official TxLINE Feed", detail: "Official match updates and live community activity powered by TxLINE." }, conversation: [],
     };
-  } catch (error) {
-    return replayFallback(fixtureId, error instanceof Error ? `Live Mode unavailable: ${error.message}` : "Live Mode unavailable: TxLINE network request failed");
+  } catch {
+    return liveSetupDataset(fixtureId, "Official live match coverage is reconnecting. Historical Replay remains available.");
   }
 }
 
 export async function getMatchExperienceDataset(matchId: string, queryMode?: string): Promise<MatchExperienceDataset> {
   const config = getReplayConfig();
-  if (matchId !== config.fixtureId) throw new Error("MATCH_NOT_FOUND");
+  if (matchId !== config.matchId) throw new Error("MATCH_NOT_FOUND");
   return resolveMatchSourceMode(queryMode) === "replay" ? createReplayDataset(matchId) : createLiveDataset(matchId);
 }

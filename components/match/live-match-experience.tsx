@@ -13,11 +13,12 @@ import { ReplayControls } from "./replay-controls";
 import { useReplayController } from "@/lib/replay/use-replay-controller";
 import type { MatchRoomView, OfficialEventView } from "@/lib/txline/replay-fixture";
 import type { MatchExperienceDataset } from "@/lib/match/match-data-source";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLiveMatchSource } from "@/lib/match/use-live-match-source";
 import { useLiveCaptureWindow } from "@/lib/match/use-live-capture-window";
 import { DataModeSwitch } from "./data-mode-switch";
 import { MatchTreasuryPanel } from "@/components/opinion/match-treasury-panel";
+import { DEMO_REPLAY_INTERVAL_MS } from "@/lib/replay/demo-sequence";
 
 export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }) {
   const sourceMatch = useLiveMatchSource(dataset);
@@ -27,6 +28,24 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
   const captureSeconds = replay.captureEvent ? replay.captureSeconds : liveCapture.seconds;
   const [composerEvent, setComposerEvent] = useState<OfficialEventView | null>(null);
   const [publishedMoments, setPublishedMoments] = useState<MatchRoomView["moments"]>([]);
+  const [livePresentationStep, setLivePresentationStep] = useState(0);
+  useEffect(() => {
+    if (dataset.sourceMode !== "live") { setLivePresentationStep(0); return; }
+    setLivePresentationStep(0);
+    const timer = window.setInterval(() => setLivePresentationStep((step) => {
+      if (step >= 7) { window.clearInterval(timer); return step; }
+      return step + 1;
+    }), DEMO_REPLAY_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [dataset.match.id, dataset.sourceMode]);
+  const scheduledMomentIds = useMemo(() => dataset.sourceMode === "live" ? replay.match.moments.map((moment) => moment.id) : [], [dataset.sourceMode, replay.match.moments]);
+  const revealedMoments = dataset.sourceMode === "live" ? replay.match.moments.slice(0, Math.min(livePresentationStep, replay.match.moments.length)) : replay.match.moments;
+  const presentedMatch = useMemo(() => {
+    const moments = [...publishedMoments, ...revealedMoments];
+    const championActions = moments.reduce((total, moment) => total + moment.championCount, 0);
+    const leadingShare = championActions && moments[0] ? Math.round((moments[0].championCount / championActions) * 100) : 0;
+    return { ...replay.match, moments, championActions, leadingShare, state: dataset.sourceMode === "live" && livePresentationStep >= 7 ? "final" as const : replay.match.state };
+  }, [dataset.sourceMode, livePresentationStep, publishedMoments, replay.match, revealedMoments]);
   const closeComposer = useCallback(() => setComposerEvent(null), []);
   const openComposer = (event: OfficialEventView) => { replay.pause(); setComposerEvent(event); };
   return (
@@ -44,11 +63,11 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
       </AnimatePresence>
       <div className="match-content">
         <section className="moments-section" id="moments">
-          <MomentFeed matchId={replay.match.id} moments={[...publishedMoments, ...replay.match.moments]} mode={dataset.sourceMode} />
+          <MomentFeed matchId={replay.match.id} moments={[...publishedMoments, ...replay.match.moments]} mode={dataset.sourceMode} scheduledMomentIds={scheduledMomentIds} visibleMomentIds={revealedMoments.map((moment) => moment.id)} />
         </section>
         <div className="match-side-rail" id="rankings">
-          <MomentumMeter match={replay.match} />
-          <MatchTreasuryPanel match={replay.match} />
+          <MomentumMeter match={presentedMatch} />
+          <MatchTreasuryPanel match={presentedMatch} />
         </div>
       </div>
       {composerEvent && <MomentComposer matchId={replay.match.id} event={composerEvent} open onClose={closeComposer} onPublished={(moment) => setPublishedMoments((current) => [moment, ...current])} />}

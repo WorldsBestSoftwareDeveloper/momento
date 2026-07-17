@@ -105,7 +105,7 @@ export function mapTxlineMatch(fixture: TxlineFixture, updates: TxlineScoreUpdat
   const awayScore = fixture.Participant1IsHome ? rawScore[1] : rawScore[0];
   const allEvents = ordered.map((update) => mapTxlineEvent(update, fixture)).filter((event): event is OfficialEventView => event !== null).filter((event) => event.confirmed);
   const events = mode === "live" && allEvents.length > 24 ? [allEvents[0], ...allEvents.slice(-23)] : allEvents;
-  const seed = getDemoMatch("france-spain-demo", mode, mode === "replay" ? "Demo Replay • Recorded TxLINE Data" : "Live • Official TxLINE Data");
+  const seed = getDemoMatch("france-spain-demo", mode, mode === "replay" ? "Historical Replay • Official TxLINE Match Data" : "Live Match • Official TxLINE Feed");
   const final = latest ? isFinal(latest) : false;
   const goalEvents = events.filter((event) => event.kind === "goal");
   const moments = seed.moments.map((moment, index) => {
@@ -121,7 +121,7 @@ export function mapTxlineMatch(fixture: TxlineFixture, updates: TxlineScoreUpdat
     statusLabel: latest ? statusLabel(latest) : "Scheduled",
     minute: final ? "FT" : latest ? `${minuteNumber(latest)}′` : "—",
     mode,
-    modeLabel: mode === "replay" ? "Demo Replay • Recorded TxLINE Data" : "Live • Official TxLINE Data",
+    modeLabel: mode === "replay" ? "Historical Replay • Official TxLINE Match Data" : "Live Match • Official TxLINE Feed",
     txlineVerified: true,
     updatedAtLabel: latest?.ts ? `TxLINE update • ${new Date(latest.ts > 10_000_000_000 ? latest.ts : latest.ts * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "TxLINE fixture snapshot",
     home: { ...home, score: homeScore },

@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Coins, ExternalLink, X } from "lucide-react";
+import Link from "next/link";
+import { Coins, ExternalLink, Radio, X } from "lucide-react";
 import { PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -14,28 +15,30 @@ export function OpinionChampion({ matchId, momentId, mode, championed, count, bu
   const { connection } = useConnection(); const { publicKey, sendTransaction } = useWallet(); const { setVisible } = useWalletModal(); const customAmount = Number(custom); const support = Number.isFinite(customAmount) && customAmount > 0 ? { amountSol: customAmount } : SUPPORT_LEVELS[level];
   const act = async () => {
     setError(null); setSignature(null);
-    if (mode === "replay") { await recordContribution({ matchId, momentId, amountSol: support.amountSol, signature: `replay-${crypto.randomUUID()}`, mode }); if (!championed) onChampion(); setOpen(false); return; }
+    if (mode === "replay") return;
     if (!publicKey) { setVisible(true); return; }
     const address = process.env.NEXT_PUBLIC_TREASURY_ADDRESS;
-    if (!address) { window.alert("Live treasury is not configured. Use Replay Mode or add NEXT_PUBLIC_TREASURY_ADDRESS."); return; }
+    if (!address) { window.alert("Support is temporarily unavailable while the live treasury reconnects."); return; }
     setSending(true);
     try { const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: new PublicKey(address), lamports: Math.round(support.amountSol * LAMPORTS_PER_SOL) })); const nextSignature = await sendTransaction(tx, connection); await connection.confirmTransaction(nextSignature, "confirmed"); await recordContribution({ matchId, momentId, amountSol: support.amountSol, signature: nextSignature, mode }); if (!championed) onChampion(); setSignature(nextSignature); }
     catch (cause) { const message = cause instanceof Error ? cause.message : "The transaction could not be completed."; setError(/reject|cancel/i.test(message) ? "Transaction cancelled. No contribution was made." : message); }
     finally { setSending(false); }
   };
   return <div className={`opinion-champion ${compact ? "is-compact" : ""}`}>
-    <div className="moment-action-pair"><div><ChampionButton compact={compact} championed={championed} count={count} busy={busy} onChampion={onChampion} />{!compact && <small>Free endorsement • one per fan • no wallet</small>}</div><div><motion.button type="button" className="support-moment-button" disabled={busy || sending} onClick={(event) => { event.stopPropagation(); setOpen(true); }} whileTap={{ scale: .96 }}>
+    <div className="moment-action-pair"><div><ChampionButton compact={compact} championed={championed} count={count} busy={busy} onChampion={onChampion} />{!compact && <small>Free endorsement • one per account • no wallet</small>}</div><div>{mode === "replay" ? <Link className="support-moment-button" href={`/matches/${matchId}?mode=live`} onClick={(event) => event.stopPropagation()}>
+      <span className="support-coin"><Radio size={compact ? 16 : 18} /></span><span>Watch Live &amp; Support</span>
+    </Link> : <motion.button type="button" className="support-moment-button" disabled={busy || sending} onClick={(event) => { event.stopPropagation(); setOpen(true); }} whileTap={{ scale: .96 }}>
       <span className="support-coin"><Coins size={compact ? 16 : 18} /></span><span>{compact ? "Support" : "Support this Moment"}</span>
-    </motion.button>{!compact && <small>Back this Moment with SOL • wallet required in Live</small>}</div></div>
-    <AnimatePresence>{open && <motion.div className="support-sheet-backdrop" role="presentation" onClick={(event) => { event.stopPropagation(); if (event.target === event.currentTarget) setOpen(false); }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    </motion.button>}{!compact && <small>{mode === "replay" ? "Support is available during live match coverage" : "Financial backing in SOL • wallet signature required"}</small>}</div></div>
+    <AnimatePresence>{mode === "live" && open && <motion.div className="support-sheet-backdrop" role="presentation" onClick={(event) => { event.stopPropagation(); if (event.target === event.currentTarget) setOpen(false); }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <motion.section className="support-sheet" role="dialog" aria-modal="true" aria-labelledby={`support-title-${momentId}`} initial={{ y: 42, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 28, opacity: 0 }} transition={{ type: "spring", damping: 28, stiffness: 320 }}>
         <div className="sheet-handle" /><header><div><span className="eyebrow">Community-backed support</span><h3 id={`support-title-${momentId}`}>Support this Moment</h3></div><button type="button" className="icon-button" onClick={() => setOpen(false)} aria-label="Close support options"><X /></button></header>
-        <div className="champion-support-key"><div><b>❤️ Champion</b><span>Free community endorsement. One per fan. No wallet required.</span></div><div><b>💰 Support</b><span>Back this Moment with SOL. Live Mode requires a wallet signature.</span></div></div>
+        <div className="champion-support-key"><div><b>❤️ Champion</b><span>Free community endorsement. One per account. No wallet required.</span></div><div><b>💰 Support</b><span>Financial backing using SOL. Contributes to the Support Pool and requires a wallet signature for live matches.</span></div></div>
         <div className="sheet-intent">I&apos;m contributing SOL to the Moment I believe will define this match.</div>
         <div className="sheet-pool"><span>Your Contribution</span><strong>{support.amountSol.toFixed(2)} SOL</strong></div>
         <div className="sheet-options">{SUPPORT_LEVELS.map((item, index) => <button type="button" key={item.level} className={!custom && level === index ? "is-active" : ""} onClick={() => { setLevel(index); setCustom(""); }}>{item.amountSol.toFixed(2)} SOL</button>)}</div>
         <label className="custom-support"><span>Custom amount</span><div><input type="number" min="0.001" step="0.001" inputMode="decimal" value={custom} onChange={(event) => setCustom(event.target.value)} placeholder="0.00" /><b>SOL</b></div></label>
-        <p className={`transaction-context is-${mode}`}>{mode === "replay" ? "Replay simulation • No wallet • No transaction" : "Live Devnet • Real wallet signature • Real SOL contribution"}</p>
+        <p className="transaction-context is-live">Live Match • Real wallet signature • Real SOL contribution</p>
         <ol className="support-steps"><li><b>1</b><span>Connect wallet</span></li><li><b>2</b><span>Choose contribution</span></li><li><b>3</b><span>Approve signature</span></li><li><b>4</b><span>Transaction confirmed</span></li><li><b>5</b><span>Realtime pool updates</span></li></ol>
         <SettlementExplainer compact />
         {error && <p className="support-error" role="alert">{error}</p>}

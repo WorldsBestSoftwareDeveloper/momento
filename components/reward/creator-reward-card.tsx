@@ -24,7 +24,7 @@ export function CreatorRewardCard({ reward, compact = false, onClaimed }: { rewa
   const claim = async () => { try { await state.claimReward(); onClaimed?.(); } catch { /* inline recovery */ } };
 
   return <motion.section className={`creator-reward-card ${compact ? "is-compact" : ""}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .28 }}>
-    <div className="reward-card-top"><span className="reward-trophy"><Trophy /></span><div><span className="eyebrow">Champion of the Match</span><h3>{reward.momentTitle}</h3><p>{reward.creatorName} <span>{reward.creatorHandle}</span></p></div></div>
+    <div className="reward-card-top"><span className="reward-trophy"><Trophy /></span><div><span className="eyebrow">Winning Moment</span><h3>{reward.momentTitle}</h3><p>{reward.creatorName} <span>{reward.creatorHandle}</span></p></div></div>
     <div className="reward-unlock"><div><Gift size={17} /><span><small>Creator reward</small><strong>{reward.amountSol} SOL</strong></span></div><span className={`reward-status status-${state.status}`}>{busy && <LoaderCircle size={13} />}{state.status === "confirmed" && <Check size={13} />}{state.status === "failed" && <CircleAlert size={13} />}{statusCopy(state.status)}</span></div>
     {state.address && <div className="reward-wallet-line"><Wallet size={14} /><span>{shortWalletAddress(state.address)}</span><b>Devnet</b></div>}
     {state.error && <div className="reward-error"><CircleAlert size={15} /><span>{state.error}</span><button type="button" onClick={state.retry}>Retry</button></div>}
