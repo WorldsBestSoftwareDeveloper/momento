@@ -45,6 +45,19 @@ Devnet activation is available through `npx tsx scripts/activate-txline.ts`. It 
 
 The browser connects only to Momento’s normalized `/api/txline/match` and `/api/txline/stream` routes.
 
+## Solana creator rewards
+
+Milestone 6 uses the official Solana Wallet Adapter packages for optional Phantom/Solflare connections. The social product remains fully usable without a wallet. A connected winning creator can claim a configurable Devnet demo reward and open its confirmed transaction in Solana Explorer.
+
+```env
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_REWARDS_ENABLED=true
+NEXT_PUBLIC_REWARD_AMOUNT_SOL=0.25
+NEXT_PUBLIC_REWARD_CREATOR_WALLET=
+```
+
+See [WALLET_SETUP.md](WALLET_SETUP.md). Never configure a private key or seed phrase.
+
 ## Validation
 
 ```powershell
@@ -54,4 +67,3 @@ npm run build
 ```
 
 See [JUDGE_SETUP.md](JUDGE_SETUP.md) for the demo and deployment checklist.
-

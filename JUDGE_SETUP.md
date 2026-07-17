@@ -51,6 +51,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-public-anon-key
 NEXT_PUBLIC_APP_URL=https://YOUR_DOMAIN
 ```
 
+### Optional Solana creator reward
+
+```env
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_REWARDS_ENABLED=true
+NEXT_PUBLIC_REWARD_AMOUNT_SOL=0.25
+NEXT_PUBLIC_REWARD_CREATOR_WALLET=your-demo-creator-public-address
+```
+
+Leave the creator address blank only when judges should be able to claim from any connected Devnet wallet. No private key is used or deployed. See `WALLET_SETUP.md` for Phantom/Solflare and Devnet instructions.
+
 Do not deploy `TXLINE_WALLET_PATH`, wallet JSON, private keys, `TXLINE_RPC_URL`, or a Supabase service-role key. They are activation/local-operator values, not application runtime values.
 
 After changing variables, redeploy the latest commit.
@@ -71,4 +82,3 @@ After changing variables, redeploy the latest commit.
 - Champion it from another session and add a realtime comment.
 - Explain the four TxLINE endpoints above.
 - Show the deployed URL and responsive mobile layout.
-

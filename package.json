@@ -15,6 +15,9 @@
   "description": "Momento turns official football events into shared fan experiences.",
   "dependencies": {
     "@solana/spl-token": "^0.4.15",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-react-ui": "^0.9.39",
     "@solana/web3.js": "^1.98.4",
     "@supabase/supabase-js": "^2.110.5",
     "clsx": "^2.1.1",
