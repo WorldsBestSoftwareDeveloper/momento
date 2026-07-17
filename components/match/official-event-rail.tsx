@@ -11,11 +11,11 @@ export function OfficialEventRail({ events, mode, verified = true }: { events: O
         {events.map((event) => {
           const Icon = icons[event.kind];
           return (
-            <button key={event.id} className={`event-token ${event.active ? "is-active" : ""}`} type="button" role="listitem" aria-label={`${event.minute} ${event.title}, ${event.team}`}>
+            <div key={event.id} className={`event-token ${event.active ? "is-active" : ""}`} role="listitem" aria-label={`${event.minute} ${event.title}, ${event.team}`}>
               <span className="event-minute">{event.minute}</span>
               {event.kind === "yellow-card" || event.kind === "red-card" ? <i className={`card-icon ${event.kind}`} aria-hidden="true" /> : event.kind === "var" ? <i className="var-icon" aria-hidden="true">VAR</i> : Icon ? <Icon size={21} /> : null}
               <span><strong>{event.title}</strong><small>{event.team}</small></span>
-            </button>
+            </div>
           );
         })}
       </div>

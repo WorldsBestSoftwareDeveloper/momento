@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Bell, Search } from "lucide-react";
 import { getReplayConfig } from "@/lib/txline/replay-config";
 import { WalletControl } from "@/components/wallet/wallet-control";
+import { GlobalSearch } from "@/components/search/global-search";
 
 export function DesktopHeader() {
   const config = getReplayConfig();
@@ -18,8 +18,7 @@ export function DesktopHeader() {
         <Link href="/profile">Profile</Link>
       </nav>
       <div className="header-actions">
-        <button className="icon-button" aria-label="Search" disabled><Search size={19} /></button>
-        <button className="icon-button notification-button" aria-label="Notifications"><Bell size={18} /><i /></button>
+        <GlobalSearch fixtureId={config.fixtureId} />
         <WalletControl compact />
       </div>
     </header>

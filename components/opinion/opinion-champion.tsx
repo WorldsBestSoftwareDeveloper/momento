@@ -1,23 +1,25 @@
 "use client";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, X } from "lucide-react";
+import { ExternalLink, Heart, X } from "lucide-react";
 import { PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { SUPPORT_LEVELS } from "@/lib/opinion-market/model";
 import { recordContribution } from "@/lib/opinion-market/contribution-store";
 export function OpinionChampion({ matchId, momentId, mode, championed, count, busy, compact, onChampion }: { matchId: string; momentId: string; mode: "live" | "replay"; championed: boolean; count: number; busy?: boolean; compact?: boolean; onChampion: () => void }) {
-  const [level, setLevel] = useState(0); const [sending, setSending] = useState(false); const [open, setOpen] = useState(false); const [custom, setCustom] = useState("");
+  const [level, setLevel] = useState(0); const [sending, setSending] = useState(false); const [open, setOpen] = useState(false); const [custom, setCustom] = useState(""); const [error, setError] = useState<string | null>(null); const [signature, setSignature] = useState<string | null>(null);
   const { connection } = useConnection(); const { publicKey, sendTransaction } = useWallet(); const { setVisible } = useWalletModal(); const customAmount = Number(custom); const support = Number.isFinite(customAmount) && customAmount > 0 ? { amountSol: customAmount } : SUPPORT_LEVELS[level];
   const act = async () => {
+    setError(null); setSignature(null);
     if (championed) { onChampion(); setOpen(false); return; }
     if (mode === "replay") { await recordContribution({ matchId, momentId, amountSol: support.amountSol, signature: `replay-${crypto.randomUUID()}`, mode }); onChampion(); setOpen(false); return; }
     if (!publicKey) { setVisible(true); return; }
     const address = process.env.NEXT_PUBLIC_TREASURY_ADDRESS;
     if (!address) { window.alert("Live treasury is not configured. Use Replay Mode or add NEXT_PUBLIC_TREASURY_ADDRESS."); return; }
     setSending(true);
-    try { const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: new PublicKey(address), lamports: Math.round(support.amountSol * LAMPORTS_PER_SOL) })); const signature = await sendTransaction(tx, connection); await connection.confirmTransaction(signature, "confirmed"); await recordContribution({ matchId, momentId, amountSol: support.amountSol, signature, mode }); onChampion(); setOpen(false); }
+    try { const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: new PublicKey(address), lamports: Math.round(support.amountSol * LAMPORTS_PER_SOL) })); const nextSignature = await sendTransaction(tx, connection); await connection.confirmTransaction(nextSignature, "confirmed"); await recordContribution({ matchId, momentId, amountSol: support.amountSol, signature: nextSignature, mode }); onChampion(); setSignature(nextSignature); }
+    catch (cause) { const message = cause instanceof Error ? cause.message : "The transaction could not be completed."; setError(/reject|cancel/i.test(message) ? "Transaction cancelled. No contribution was made." : message); }
     finally { setSending(false); }
   };
   return <div className={`opinion-champion ${compact ? "is-compact" : ""}`}>
@@ -32,6 +34,8 @@ export function OpinionChampion({ matchId, momentId, mode, championed, count, bu
         <div className="sheet-options">{SUPPORT_LEVELS.map((item, index) => <button type="button" key={item.level} className={!custom && level === index ? "is-active" : ""} onClick={() => { setLevel(index); setCustom(""); }}>{item.amountSol.toFixed(2)} SOL</button>)}</div>
         <label className="custom-support"><span>Custom amount</span><div><input type="number" min="0.001" step="0.001" inputMode="decimal" value={custom} onChange={(event) => setCustom(event.target.value)} placeholder="0.00" /><b>SOL</b></div></label>
         <p className={`transaction-context is-${mode}`}>{mode === "replay" ? "Replay Mode • Simulated pool contribution" : "Live Mode • Real Solana Devnet transaction to the community treasury"}</p>
+        {error && <p className="support-error" role="alert">{error}</p>}
+        {signature && <a className="support-success" href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`} target="_blank" rel="noreferrer">Contribution confirmed <ExternalLink /></a>}
         <button type="button" className="primary-button sheet-confirm" disabled={sending || busy || support.amountSol <= 0} onClick={() => void act()}>{sending ? "Confirming…" : `Confirm ${support.amountSol.toFixed(2)} SOL`}</button>
       </motion.section>
     </motion.div>}</AnimatePresence>

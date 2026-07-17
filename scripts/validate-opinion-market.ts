@@ -27,17 +27,18 @@ async function main() {
     const moment = match.moments[0];
     const seeded = await client.from("moments").upsert({ id: moment.id, owner_id: auth.data.user.id, title: moment.title, description: moment.caption, creator_name: moment.creator, creator_handle: moment.handle, creator_initials: moment.initials, video_path: moment.videoPath, official_event_id: moment.eventId, official_event_label: moment.eventLabel, champion_count: moment.championCount, comment_count: moment.commentCount ?? 0 }, { onConflict: "id", ignoreDuplicates: true });
     if (seeded.error) throw new Error(`Moment seed unavailable: ${seeded.error.message}`);
+    const persisted = await client.from("opinion_contributions").select("amount_lamports,transaction_signature").eq("transaction_signature", signature).single();
+    if (persisted.error || persisted.data.amount_lamports !== 20_000_000) throw new Error(`Persisted contribution mismatch: ${persisted.error?.message ?? "wrong amount"}`);
+    const realtimeSignature = `replay-qa-${crypto.randomUUID()}`;
     const observed = new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error("Supabase Realtime contribution event timed out.")), 12_000);
       client.channel(`opinion-validation-${crypto.randomUUID()}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "opinion_contributions", filter: `match_id=eq.${match.id}` }, () => { clearTimeout(timeout); resolve(); }).subscribe(async (status) => {
         if (status !== "SUBSCRIBED") return;
-        const inserted = await client.from("opinion_contributions").upsert({ match_id: match.id, moment_id: moment.id, user_id: auth.data.user!.id, amount_lamports: 20_000_000, transaction_signature: signature, mode: "live" }, { onConflict: "transaction_signature", ignoreDuplicates: true });
+        const inserted = await client.from("opinion_contributions").insert({ match_id: match.id, moment_id: moment.id, user_id: auth.data.user!.id, amount_lamports: 20_000_000, transaction_signature: realtimeSignature, mode: "replay" });
         if (inserted.error) { clearTimeout(timeout); reject(new Error(`Contribution persistence failed: ${inserted.error.message}`)); }
       });
     });
     await observed;
-    const persisted = await client.from("opinion_contributions").select("amount_lamports,transaction_signature").eq("transaction_signature", signature).single();
-    if (persisted.error || persisted.data.amount_lamports !== 20_000_000) throw new Error(`Persisted contribution mismatch: ${persisted.error?.message ?? "wrong amount"}`);
     realtime = "passed";
   }
   console.log(JSON.stringify({ poolMath: "passed", settlement: "passed", supabaseTable: "passed", realtime, contributionRows: result.count }));

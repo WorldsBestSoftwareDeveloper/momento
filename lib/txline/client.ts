@@ -73,7 +73,7 @@ export class TxlineClient {
 
   private send(url: string, options: RequestInit): Promise<Response> {
     const headers = new Headers(options.headers);
-    headers.set("Accept", "application/json");
+    if (!headers.has("Accept")) headers.set("Accept", "application/json");
     headers.set("Authorization", `Bearer ${this.guestJwt}`);
     headers.set("X-Api-Token", this.apiToken);
 

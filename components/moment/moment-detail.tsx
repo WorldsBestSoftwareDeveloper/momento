@@ -8,6 +8,7 @@ import { useMomentCommunity } from "@/lib/community/use-moment-community";
 import { LiveActivity } from "./live-activity";
 import { MomentMarketSummary } from "@/components/opinion/moment-market-summary";
 import { OpinionChampion } from "@/components/opinion/opinion-champion";
+import { useOpinionContributions } from "@/lib/opinion-market/contribution-store";
 
 function timeAgo(value: string) {
   const seconds = Math.max(1, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
@@ -18,6 +19,7 @@ function timeAgo(value: string) {
 
 export function MomentDetail({ matchId, moment, mode, initialTime = 0, onClose }: { matchId: string; moment: MomentView; mode: "live" | "replay"; initialTime?: number; onClose: () => void }) {
   const { snapshot, comments, busy, error, toggleChampion, addComment } = useMomentCommunity(moment);
+  const contributions = useOpinionContributions(matchId, moment.id);
   const [body, setBody] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -49,6 +51,7 @@ export function MomentDetail({ matchId, moment, mode, initialTime = 0, onClose }
         </header>
         <OpinionChampion matchId={matchId} momentId={moment.id} mode={mode} championed={snapshot.championed} count={snapshot.championCount} busy={busy} onChampion={toggleChampion} />
         <MomentMarketSummary matchId={matchId} moment={{ ...moment, championCount: snapshot.championCount }} final={moment.isWinner} />
+        <section className="contribution-feed" aria-labelledby={`contributions-${moment.id}`}><div><strong id={`contributions-${moment.id}`}>Opinion Market history</strong><span>Settlement after Final Whistle</span></div>{contributions.rows.length ? contributions.rows.slice(0, 3).map((row) => <article key={row.id}><span><strong>Your Contribution</strong><small>{row.mode === "replay" ? "Replay pool simulation" : "Confirmed Solana Devnet"}</small></span><b>{row.amountSol.toFixed(2)} SOL</b>{row.mode === "live" && <a href={`https://explorer.solana.com/tx/${row.signature}?cluster=devnet`} target="_blank" rel="noreferrer">Explorer</a>}</article>) : <p>No contributions yet. Support this Moment to join the pool.</p>}</section>
         <LiveActivity snapshot={snapshot} />
         <div className="discussion-title"><div><MessageCircle size={16} /><strong>Discussion</strong></div><span>{snapshot.commentCount.toLocaleString()} comments</span></div>
         <div className="comment-list" ref={listRef} aria-live="polite">
