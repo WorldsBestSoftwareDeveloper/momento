@@ -4,6 +4,19 @@ import { assertFixtureId, requireTxlineConfig } from "./validation";
 
 function client() { return new TxlineClient(requireTxlineConfig()); }
 
+async function within<T>(operation: (signal: AbortSignal) => Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error(label)), timeoutMs);
+  try {
+    return await operation(controller.signal);
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error(label);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export function normalizeScoreUpdate(payload: unknown): TxlineScoreUpdate | null {
   if (!payload || typeof payload !== "object") return null;
   const raw = payload as Record<string, unknown>;
@@ -41,7 +54,12 @@ function scoreArray(payload: unknown): TxlineScoreUpdate[] {
 }
 
 export async function getScoreSnapshot(fixtureId: string) {
-  return scoreArray(await client().get<unknown>(`scores/snapshot/${assertFixtureId(fixtureId)}`, { cache: "no-store" }));
+  const payload = await within(
+    (signal) => client().get<unknown>(`scores/snapshot/${assertFixtureId(fixtureId)}`, { cache: "no-store", signal }),
+    8_000,
+    "TXLINE_SCORE_SNAPSHOT_TIMEOUT",
+  );
+  return scoreArray(payload);
 }
 
 export async function getHistoricalScores(fixtureId: string) {

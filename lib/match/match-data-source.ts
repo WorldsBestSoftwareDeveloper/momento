@@ -3,7 +3,7 @@ import type { ReplayBeat, ReplayConversationMessage } from "@/lib/replay/types";
 import { getFixture } from "@/lib/txline/fixtures";
 import { mapTxlineMatch } from "@/lib/txline/mapper";
 import { loadTxlineReplay } from "@/lib/txline/replay";
-import { getScoreSnapshot } from "@/lib/txline/scores";
+import { getHistoricalScores, getScoreSnapshot } from "@/lib/txline/scores";
 import { getReplayConfig } from "@/lib/txline/replay-config";
 import { getDemoMatch, type MatchRoomView } from "@/lib/txline/replay-fixture";
 import { getTxlineRuntimeConfig } from "@/lib/txline/validation";
@@ -65,9 +65,12 @@ function liveSetupDataset(fixtureId: string, detail: string): MatchExperienceDat
 
 async function createLiveDataset(fixtureId: string): Promise<MatchExperienceDataset> {
   const config = getTxlineRuntimeConfig();
-  if (!config.configured) return liveSetupDataset(fixtureId, "Set TXLINE_GUEST_JWT and TXLINE_API_TOKEN on the server. Momento will reconnect without UI changes.");
+  if (!config.configured) return replayFallback(fixtureId, "Live Mode requested without TxLINE credentials");
   try {
-    const [fixture, updates] = await Promise.all([getFixture(config.fixtureId), getScoreSnapshot(config.fixtureId)]);
+    const [fixture, updates] = await Promise.all([
+      getFixture(config.fixtureId),
+      getScoreSnapshot(config.fixtureId).catch(() => getHistoricalScores(config.fixtureId)),
+    ]);
     if (!fixture) return liveSetupDataset(fixtureId, `No TxLINE fixture found for ${config.fixtureId}.`);
     const match = mapTxlineMatch(fixture, updates, "live");
     return {
@@ -76,7 +79,7 @@ async function createLiveDataset(fixtureId: string): Promise<MatchExperienceData
       disclosure: { label: "Live • Official TxLINE Data", detail: `Authenticated score snapshots and SSE updates for fixture ${config.fixtureId}.` }, conversation: [],
     };
   } catch (error) {
-    return liveSetupDataset(fixtureId, error instanceof Error ? error.message : "TxLINE network request failed");
+    return replayFallback(fixtureId, error instanceof Error ? `Live Mode unavailable: ${error.message}` : "Live Mode unavailable: TxLINE network request failed");
   }
 }
 

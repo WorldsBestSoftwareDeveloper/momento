@@ -29,14 +29,13 @@ export class TxlineClient {
   ): Promise<T> {
     const { retryGuestAuth = true, ...requestInit } = options;
     const url = `${this.apiOrigin}/api/${path.replace(/^\/+/, "")}`;
-    let response = await this.send(url, requestInit);
+    let { response, body } = await this.exchange(url, requestInit);
 
     if (response.status === 401 && retryGuestAuth) {
       this.guestJwt = await requestGuestJwt(this.apiOrigin, this.fetchImpl);
-      response = await this.send(url, requestInit);
+      ({ response, body } = await this.exchange(url, requestInit));
     }
 
-    const body = await response.text();
     if (!response.ok) {
       const detail = body.trim() ? `: ${body}` : "";
       throw new TxlineApiError(
@@ -79,6 +78,29 @@ export class TxlineClient {
     headers.set("X-Api-Token", this.apiToken);
 
     return this.fetchImpl(url, { ...options, headers, signal: options.signal ?? AbortSignal.timeout(15_000) });
+  }
+
+  private async exchange(url: string, options: RequestInit): Promise<{ response: Response; body: string }> {
+    const controller = new AbortController();
+    const abortFromCaller = () => controller.abort(options.signal?.reason);
+    if (options.signal?.aborted) abortFromCaller();
+    else options.signal?.addEventListener("abort", abortFromCaller, { once: true });
+    const timer = setTimeout(() => controller.abort(new Error("TXLINE_REQUEST_TIMEOUT")), 15_000);
+    const headers = new Headers(options.headers);
+    headers.set("Accept", "application/json");
+    headers.set("Authorization", `Bearer ${this.guestJwt}`);
+    headers.set("X-Api-Token", this.apiToken);
+    try {
+      const response = await this.fetchImpl(url, { ...options, headers, signal: controller.signal });
+      const body = await response.text();
+      return { response, body };
+    } catch (error) {
+      if (controller.signal.aborted) throw new Error("TXLINE_REQUEST_TIMEOUT");
+      throw error;
+    } finally {
+      clearTimeout(timer);
+      options.signal?.removeEventListener("abort", abortFromCaller);
+    }
   }
 
 

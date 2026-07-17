@@ -15,10 +15,14 @@ import type { MatchRoomView, OfficialEventView } from "@/lib/txline/replay-fixtu
 import type { MatchExperienceDataset } from "@/lib/match/match-data-source";
 import { useCallback, useState } from "react";
 import { useLiveMatchSource } from "@/lib/match/use-live-match-source";
+import { useLiveCaptureWindow } from "@/lib/match/use-live-capture-window";
 
 export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }) {
   const sourceMatch = useLiveMatchSource(dataset);
   const replay = useReplayController(sourceMatch, dataset.timeline, dataset.autoAdvance);
+  const liveCapture = useLiveCaptureWindow(sourceMatch, dataset.sourceMode === "live");
+  const captureEvent = replay.captureEvent ?? liveCapture.event;
+  const captureSeconds = replay.captureEvent ? replay.captureSeconds : liveCapture.seconds;
   const [composerEvent, setComposerEvent] = useState<OfficialEventView | null>(null);
   const [publishedMoments, setPublishedMoments] = useState<MatchRoomView["moments"]>([]);
   const closeComposer = useCallback(() => setComposerEvent(null), []);
@@ -33,7 +37,7 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
       </div>
       <OfficialEventRail events={replay.visibleEvents} mode={replay.match.mode} verified={replay.match.txlineVerified} />
       <AnimatePresence mode="wait">
-        {replay.captureEvent && <motion.div key={replay.captureEvent.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: .28 }}><CaptureWindowBanner event={replay.captureEvent} seconds={replay.captureSeconds} onCapture={() => openComposer(replay.captureEvent!)} /></motion.div>}
+        {captureEvent && <motion.div key={captureEvent.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: .28 }}><CaptureWindowBanner event={captureEvent} seconds={captureSeconds} onCapture={() => openComposer(captureEvent)} /></motion.div>}
       </AnimatePresence>
       <div className="match-content">
         <section className="moments-section" id="moments">
