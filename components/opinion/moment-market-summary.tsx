@@ -11,7 +11,7 @@ export function MomentMarketSummary({ matchId, moment, final = false, compact = 
   return <div className={`moment-market-summary ${compact ? "is-compact" : ""}`}>
     <div><Coins /><span><small>Community pool</small><strong>{poolSol.toFixed(2)} SOL</strong></span></div>
     <div><TrendingUp /><span><small>Support</small><strong>{market.supportProgress}%</strong></span></div>
-    <div><Clock3 /><span><small>Status</small><strong>{market.timeRemaining}</strong></span></div>
+    {!compact && <div><Clock3 /><span><small>Status</small><strong>{market.timeRemaining}</strong></span></div>}
     {!compact && <div className="support-progress" aria-label={`${market.supportProgress}% support progress`}><i style={{ width: `${market.supportProgress}%` }} /></div>}
   </div>;
 }

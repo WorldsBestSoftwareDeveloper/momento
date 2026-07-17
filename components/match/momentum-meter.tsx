@@ -9,11 +9,10 @@ export function MomentumMeter({ match }: { match: MatchRoomView }) {
       <div className="meter" style={{ "--meter-value": `${match.leadingShare * 3.6}deg` } as React.CSSProperties}>
         <div><strong>{match.leadingShare}%</strong><span>of Champions</span></div>
       </div>
-      <p><strong>{match.moments[0].title}</strong> is leading the defining Moment conversation.</p>
-      <button type="button" className="primary-button">Champion this Moment</button>
+      <p><strong>{match.moments[0].title}</strong><br />Current leader</p>
       <div className="leaderboard-mini">
         <span className="eyebrow">Most championed</span>
-        {match.moments.map((moment) => <div key={moment.id}><strong>#{moment.rank}</strong><span>{moment.handle}</span><b>{moment.championCount.toLocaleString()}</b></div>)}
+        {match.moments.slice(0, 3).map((moment) => <div key={moment.id}><strong>#{moment.rank}</strong><span>{moment.handle}</span><b>{moment.championCount.toLocaleString()}</b></div>)}
       </div>
       <Link href={`/matches/${match.id}#moments`} className="secondary-button">See full ranking</Link>
     </aside>

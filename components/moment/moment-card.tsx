@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Clock3, Crown, MessageCircle, Pause, Play, ShieldCheck } from "lucide-react";
+import { Crown, MessageCircle, Pause, Play } from "lucide-react";
 import type { MomentView } from "@/lib/txline/replay-fixture";
 import { useMomentCommunity } from "@/lib/community/use-moment-community";
 import { MomentMarketSummary } from "@/components/opinion/moment-market-summary";
@@ -49,15 +49,15 @@ export function MomentCard({ matchId, moment, mode, featured = false, onOpen }: 
       <span className="duration-chip"><i />0:{moment.durationSeconds.toString().padStart(2, "0")}</span>
       <button type="button" className="play-button" aria-label={`${playing ? "Pause" : "Play"} ${moment.title}`} onClick={(event) => { event.stopPropagation(); void toggleVideo(); }}>{playing ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}</button>
       <div className="media-gradient" />
-      <div className="moment-overlay"><span className="event-chip">{moment.eventLabel}</span>{moment.txlineVerified && <span className="verified-event-chip"><ShieldCheck size={11} /> TxLINE event</span>}<button type="button" className="moment-title-button" onClick={(event) => { event.stopPropagation(); open(); }}><h3>{moment.title}</h3></button></div>
+      <div className="moment-overlay"><button type="button" className="moment-title-button" onClick={(event) => { event.stopPropagation(); open(); }}><h3>{moment.title}</h3></button></div>
     </div>
     <div className="moment-meta">
       <div className="avatar creator-avatar" aria-hidden="true">{moment.posterPath ? <Image src={moment.posterPath} alt="" fill sizes="32px" /> : moment.initials}</div>
-      <div><strong>{moment.creator}</strong><span>{moment.handle}</span><small><Clock3 size={10} /> {moment.createdAtLabel ?? "Now"}</small></div>
+      <div><strong>{moment.creator}</strong><span>{moment.handle}</span></div>
       <OpinionChampion compact matchId={matchId} momentId={moment.id} mode={mode} championed={snapshot.championed} count={snapshot.championCount} busy={busy} onChampion={toggleChampion} />
     </div>
     <div className="moment-social-proof"><span><MessageCircle size={13} /> {snapshot.commentCount} comments</span><span>{snapshot.championCount.toLocaleString()} Champions</span></div>
+    <div className={`community-rank ${moment.rank === 1 ? "is-leading" : ""}`}>{moment.rank === 1 ? "🏆 Leading" : `#${moment.rank} by Community Support`}</div>
     <MomentMarketSummary matchId={matchId} moment={{ ...moment, championCount: snapshot.championCount }} compact />
-    <button type="button" className="last-comment-preview" onClick={(event) => { event.stopPropagation(); open(); }}><strong>{snapshot.lastComment?.authorHandle ?? "Discussion"}</strong><span>{snapshot.lastComment?.body ?? "Be first to join this Moment."}</span></button>
   </article>;
 }

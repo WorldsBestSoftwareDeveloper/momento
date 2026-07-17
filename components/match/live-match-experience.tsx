@@ -16,8 +16,6 @@ import type { MatchExperienceDataset } from "@/lib/match/match-data-source";
 import { useCallback, useState } from "react";
 import { useLiveMatchSource } from "@/lib/match/use-live-match-source";
 import { useLiveCaptureWindow } from "@/lib/match/use-live-capture-window";
-import { CreatorRewardCard } from "@/components/reward/creator-reward-card";
-import { createMatchCreatorReward, rewardsEnabled } from "@/lib/reward/config";
 import { DataModeSwitch } from "./data-mode-switch";
 import { MatchTreasuryPanel } from "@/components/opinion/match-treasury-panel";
 
@@ -27,8 +25,6 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
   const liveCapture = useLiveCaptureWindow(sourceMatch, dataset.sourceMode === "live");
   const captureEvent = replay.captureEvent ?? liveCapture.event;
   const captureSeconds = replay.captureEvent ? replay.captureSeconds : liveCapture.seconds;
-  const creatorReward = createMatchCreatorReward(replay.match);
-  const showReward = rewardsEnabled() && (replay.completed || (dataset.sourceMode === "live" && replay.match.state === "final"));
   const [composerEvent, setComposerEvent] = useState<OfficialEventView | null>(null);
   const [publishedMoments, setPublishedMoments] = useState<MatchRoomView["moments"]>([]);
   const closeComposer = useCallback(() => setComposerEvent(null), []);
@@ -53,7 +49,6 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
         <div className="match-side-rail" id="rankings">
           <MomentumMeter match={replay.match} />
           <MatchTreasuryPanel match={replay.match} />
-          {showReward && <CreatorRewardCard reward={creatorReward} compact />}
         </div>
       </div>
       {composerEvent && <MomentComposer matchId={replay.match.id} event={composerEvent} open onClose={closeComposer} onPublished={(moment) => setPublishedMoments((current) => [moment, ...current])} />}
