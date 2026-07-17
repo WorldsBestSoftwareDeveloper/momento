@@ -18,6 +18,8 @@ import { useLiveMatchSource } from "@/lib/match/use-live-match-source";
 import { useLiveCaptureWindow } from "@/lib/match/use-live-capture-window";
 import { CreatorRewardCard } from "@/components/reward/creator-reward-card";
 import { createMatchCreatorReward, rewardsEnabled } from "@/lib/reward/config";
+import { DataModeSwitch } from "./data-mode-switch";
+import { MatchTreasuryPanel } from "@/components/opinion/match-treasury-panel";
 
 export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }) {
   const sourceMatch = useLiveMatchSource(dataset);
@@ -33,6 +35,7 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
   const openComposer = (event: OfficialEventView) => { replay.pause(); setComposerEvent(event); };
   return (
     <div className="match-page page-frame">
+      <DataModeSwitch matchId={dataset.match.id} mode={dataset.sourceMode} />
       <div className="replay-disclosure"><Radio size={15} /><span><strong>{dataset.disclosure.label}</strong> — {dataset.disclosure.detail}</span></div>
       {dataset.transportEnabled && <ReplayControls cursor={replay.cursor} total={dataset.timeline.length} running={replay.running} completed={replay.completed} beatLabel={replay.beat?.label ?? "Ready to begin"} onStart={replay.start} onNext={replay.next} onPause={replay.pause} onResume={replay.resume} onReset={replay.reset} onFinish={replay.finish} />}
       <div className="match-hero-grid">
@@ -45,14 +48,15 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
       </AnimatePresence>
       <div className="match-content">
         <section className="moments-section" id="moments">
-          <MomentFeed moments={[...publishedMoments, ...replay.match.moments]} />
+          <MomentFeed matchId={replay.match.id} moments={[...publishedMoments, ...replay.match.moments]} mode={dataset.sourceMode} />
         </section>
         <div className="match-side-rail" id="rankings">
           <MomentumMeter match={replay.match} />
+          <MatchTreasuryPanel match={replay.match} />
           {showReward && <CreatorRewardCard reward={creatorReward} compact />}
         </div>
       </div>
-      {composerEvent && <MomentComposer event={composerEvent} open onClose={closeComposer} onPublished={(moment) => setPublishedMoments((current) => [moment, ...current])} />}
+      {composerEvent && <MomentComposer matchId={replay.match.id} event={composerEvent} open onClose={closeComposer} onPublished={(moment) => setPublishedMoments((current) => [moment, ...current])} />}
     </div>
   );
 }

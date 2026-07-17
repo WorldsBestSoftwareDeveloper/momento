@@ -5,13 +5,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Film, ShieldCheck, Upload, X } from "lucide-react";
 import { VideoPreview } from "./video-preview";
 import { browserMediaService, type MediaPreview } from "@/lib/media/media-service";
-import { localMomentService, validateMomentText } from "@/lib/moments/moment-service";
-import { localDemoUploadService, MAX_VIDEO_BYTES, MAX_VIDEO_SECONDS, validateVideoDuration, validateVideoFile } from "@/lib/upload/upload-service";
+import { createSupabaseMomentService, validateMomentText } from "@/lib/moments/moment-service";
+import { createSupabaseUploadService, MAX_VIDEO_BYTES, MAX_VIDEO_SECONDS, validateVideoDuration, validateVideoFile } from "@/lib/upload/upload-service";
 import type { MomentView, OfficialEventView } from "@/lib/txline/replay-fixture";
 
 type ComposerStatus = "editing" | "uploading" | "publishing" | "success" | "error";
 
-export function MomentComposer({ event, open, onClose, onPublished }: { event: OfficialEventView; open: boolean; onClose: () => void; onPublished: (moment: MomentView) => void }) {
+export function MomentComposer({ matchId, event, open, onClose, onPublished }: { matchId: string; event: OfficialEventView; open: boolean; onClose: () => void; onPublished: (moment: MomentView) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -77,9 +77,11 @@ export function MomentComposer({ event, open, onClose, onPublished }: { event: O
     if (Object.keys(textErrors).length > 0 || !file || !preview) { setStatus("error"); return; }
     try {
       setStatus("uploading"); setProgress(0);
-      const media = await localDemoUploadService.upload({ file, previewUrl: preview.url, onProgress: setProgress });
+      const uploadService = await createSupabaseUploadService();
+      const media = await uploadService.upload({ file, previewUrl: preview.url, onProgress: setProgress });
       setStatus("publishing");
-      const moment = await localMomentService.create({ title, description, durationSeconds: preview.durationSeconds, event, media });
+      const momentService = await createSupabaseMomentService();
+      const moment = await momentService.create({ matchId, title, description, durationSeconds: preview.durationSeconds, event, media });
       setPublishedMoment(moment); setStatus("success"); onPublished(moment);
     } catch {
       setStatus("error"); setErrors((current) => ({ ...current, submit: "Your Moment could not be published. Your draft is safe—try again." }));

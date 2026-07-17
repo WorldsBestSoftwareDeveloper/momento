@@ -37,6 +37,7 @@ TXLINE_API_TOKEN=your-api-token
 ```
 
 Set `DEMO_MODE=true` for the judging deployment. Judges can still test live architecture with `?mode=live`.
+The match page also exposes a visible Replay/Live switch so judges can change sources without editing the URL.
 
 ### Required for Supabase community realtime
 
@@ -58,6 +59,8 @@ NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
 NEXT_PUBLIC_REWARDS_ENABLED=true
 NEXT_PUBLIC_REWARD_AMOUNT_SOL=0.25
 NEXT_PUBLIC_REWARD_CREATOR_WALLET=your-demo-creator-public-address
+NEXT_PUBLIC_TREASURY_ADDRESS=your-devnet-treasury-public-address
+OPINION_MARKET_ENABLED=true
 ```
 
 Leave the creator address blank only when judges should be able to claim from any connected Devnet wallet. No private key is used or deployed. See `WALLET_SETUP.md` for Phantom/Solflare and Devnet instructions.

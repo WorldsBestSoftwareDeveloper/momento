@@ -18,6 +18,7 @@ Open `http://localhost:3000/matches/france-spain-demo`.
 
 - `?mode=replay` selects deterministic historical replay.
 - `?mode=live` selects authenticated snapshots and SSE.
+- The match-room Replay/Live switch changes the same query flag without changing UI components.
 - Without TxLINE credentials, replay remains available and live mode shows setup guidance.
 - Without Supabase credentials, community interactions use the local demo repository.
 
@@ -57,6 +58,10 @@ NEXT_PUBLIC_REWARD_CREATOR_WALLET=
 ```
 
 See [WALLET_SETUP.md](WALLET_SETUP.md). Never configure a private key or seed phrase.
+
+## Opinion Market treasury
+
+Replay mode deterministically demonstrates community pools and 70/20/10 settlement while clearly labeling those entries as demo records. To create or reuse a private local Devnet treasury and attempt faucet funding, run `npm run treasury:setup`. The script stores key material only under the gitignored `.secrets` directory and prints the public address for `NEXT_PUBLIC_TREASURY_ADDRESS`. Never deploy the wallet file or expose it through a `NEXT_PUBLIC_` variable.
 
 ## Validation
 

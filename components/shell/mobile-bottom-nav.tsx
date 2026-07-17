@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { CircleUserRound, Gift, Home, Radio, Video } from "lucide-react";
+import { Gift, Home, Radio, Video } from "lucide-react";
 import { getReplayConfig } from "@/lib/txline/replay-config";
+import { WalletControl } from "@/components/wallet/wallet-control";
 
 export function MobileBottomNav() {
   const config = getReplayConfig();
@@ -10,7 +11,7 @@ export function MobileBottomNav() {
       <Link href={`/matches/${config.fixtureId}`}><Radio /><span>Live</span></Link>
       <button className="capture-nav" type="button" aria-label="Capture a Moment"><Video /><span>Capture</span></button>
       <Link href="/rewards"><Gift /><span>Rewards</span></Link>
-      <Link href="/profile"><CircleUserRound /><span>Profile</span></Link>
+      <div className="mobile-wallet-slot"><WalletControl compact iconOnly /><span>Wallet</span></div>
     </nav>
   );
 }

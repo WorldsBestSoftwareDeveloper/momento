@@ -45,3 +45,26 @@ export const localDemoUploadService: UploadService = {
     };
   },
 };
+
+export async function createSupabaseUploadService(): Promise<UploadService> {
+  const { getSupabaseBrowserClient } = await import("@/lib/supabase/client");
+  const client = getSupabaseBrowserClient();
+  if (!client) return localDemoUploadService;
+  return {
+    async upload({ file, onProgress }) {
+      let { data } = await client.auth.getSession();
+      if (!data.session) {
+        const auth = await client.auth.signInAnonymously();
+        if (auth.error || !auth.data.session) throw auth.error ?? new Error("Anonymous upload session unavailable.");
+        data = { session: auth.data.session };
+      }
+      const path = `${data.session.user.id}/${crypto.randomUUID()}.mp4`;
+      onProgress(0);
+      const uploaded = await client.storage.from("moments").upload(path, file, { contentType: "video/mp4", cacheControl: "3600", upsert: false });
+      if (uploaded.error) throw uploaded.error;
+      const { data: publicMedia } = client.storage.from("moments").getPublicUrl(uploaded.data.path);
+      onProgress(100);
+      return { path: uploaded.data.path, playbackUrl: publicMedia.publicUrl, byteSize: file.size };
+    },
+  };
+}

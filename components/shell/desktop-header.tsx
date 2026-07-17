@@ -14,6 +14,7 @@ export function DesktopHeader() {
         <a href="#moments">Moments</a>
         <a href="#rankings">Rankings</a>
         <Link href="/rewards">Rewards</Link>
+        <Link href="/treasury">Treasury</Link>
         <Link href="/profile">Profile</Link>
       </nav>
       <div className="header-actions">

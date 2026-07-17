@@ -18,6 +18,7 @@ coverage/
 *keypair*.json
 id.json
 .config/solana/
+.secrets/
 
 # Internal product and implementation planning (kept locally, not published).
 /ANIMATION_SPEC.md
