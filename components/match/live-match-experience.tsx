@@ -19,7 +19,7 @@ import { useCanonicalMatchState } from "@/lib/match/canonical-match-state";
 
 export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }) {
   const sourceMatch = useLiveMatchSource(dataset);
-  const { mode, match: canonicalMatch, visibleEvents, activeEvent, registerSource } = useCanonicalMatchState();
+  const { mode, match: canonicalMatch, visibleEvents, activeEvent, cursor, registerSource } = useCanonicalMatchState();
   const [composerEvent, setComposerEvent] = useState<OfficialEventView | null>(null);
   const [publishedMoments, setPublishedMoments] = useState<MatchRoomView["moments"]>([]);
   const [captureSeconds, setCaptureSeconds] = useState(0);
@@ -56,10 +56,10 @@ export function MatchExperience({ dataset }: { dataset: MatchExperienceDataset }
         <section className="moments-section" id="moments">
           <MomentFeed matchId={match.id} moments={match.moments} mode={mode} scheduledMomentIds={sourceMatch.moments.map((moment) => moment.id)} visibleMomentIds={match.moments.map((moment) => moment.id)} />
         </section>
-        <div className="match-side-rail" id="rankings">
+        {(mode === "replay" || cursor >= 5) && <div className="match-side-rail" id="rankings">
           <MomentumMeter match={match} />
           <MatchTreasuryPanel match={match} />
-        </div>
+        </div>}
       </div>
       {composerEvent && <MomentComposer matchId={match.id} event={composerEvent} open onClose={closeComposer} onPublished={(moment) => setPublishedMoments((current) => [moment, ...current])} />}
     </div>
